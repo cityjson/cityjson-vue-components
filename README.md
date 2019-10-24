@@ -41,3 +41,13 @@ A simple card view with details about a city object.
 ### CityObjectsTree
 
 A tree view of city objects.
+
+## Development
+
+The components are located in the `lib-components` folder and they are exported through `src/lib-components/index.js`.
+
+To build a new version run: `npm run build`. The output file is located in `dist`.
+
+For more information you may read:
+- the official cookbook [recipe](https://vuejs.org/v2/cookbook/packaging-sfc-for-npm.html) of Vue.js of how to bundle components for npm, or
+- the [vue-sfc-rollup](https://github.com/team-innovation/vue-sfc-rollup) template upon which this repository is based.
