@@ -45,6 +45,11 @@ const external = [
 const globals = {
   // Provide global variable names to replace your external imports
   // eg. jquery: '$'
+  'jquery': '$',
+  'lodash': '_',
+  'three': 'THREE',
+  'three-orbitcontrols': 'OrbitControls',
+  'earcut': 'earcut',
 };
 
 // Customize configs for individual targets

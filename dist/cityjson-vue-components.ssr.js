@@ -918,7 +918,7 @@ function install(Vue) {
 }
 
 // Create module definition for Vue.use()
-var plugin = {
+var CityJSONComponents = {
   install: install,
 };
 
@@ -931,5 +931,5 @@ if (typeof window !== 'undefined') {
   GlobalVue = global.Vue;
 }
 if (GlobalVue) {
-  GlobalVue.use(plugin);
-}exports.CityObjectCard=CityObjectCard;exports.CityObjectsTree=CityObjectsTree;exports.CityObjectsTreeItem=CityObjectsTreeItem;exports.ThreeJsViewer=ThreeJsViewer;exports.default=plugin;
+  GlobalVue.use(CityJSONComponents);
+}exports.CityObjectCard=CityObjectCard;exports.CityObjectsTree=CityObjectsTree;exports.CityObjectsTreeItem=CityObjectsTreeItem;exports.ThreeJsViewer=ThreeJsViewer;exports.default=CityJSONComponents;

@@ -11,7 +11,7 @@ function install(Vue) {
 }
 
 // Create module definition for Vue.use()
-const plugin = {
+const CityJSONComponents = {
   install,
 };
 
@@ -24,11 +24,11 @@ if (typeof window !== 'undefined') {
   GlobalVue = global.Vue;
 }
 if (GlobalVue) {
-  GlobalVue.use(plugin);
+  GlobalVue.use(CityJSONComponents);
 }
 
 // Default export is library as a whole, registered via Vue.use()
-export default plugin;
+export default CityJSONComponents;
 
 // To allow individual component use, export components
 // each can be registered via Vue.component()
