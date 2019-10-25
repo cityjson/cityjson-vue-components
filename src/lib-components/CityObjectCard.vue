@@ -9,7 +9,7 @@
 <script>
 import $ from 'jquery'
 
-import CityObjectInfo from './CityObjectInfo'
+import CityObjectInfo from './CityObjectInfo.vue'
 
 export default {
   name: "CityObjectCard",
