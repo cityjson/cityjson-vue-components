@@ -17,9 +17,12 @@
     "build:unpkg": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format iife"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.11.2",
+    "bootstrap": "^4.3.1",
     "earcut": "^2.2.1",
     "jquery": "^3.4.1",
     "lodash": "^4.17.15",
+    "popper": "^1.0.1",
     "three": "^0.109.0",
     "three-orbitcontrols": "^2.108.1"
   },
