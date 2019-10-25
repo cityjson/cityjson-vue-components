@@ -40,7 +40,7 @@
           {{ attributesCount }} Attributes
       </expandable-badge>
             <expandable-badge
-        v-if="hasAttributes"
+        v-if="hasGeometries"
         @click="toggle_mode(2)"
         color="danger"
         :expanded="!edit_mode && is_mode(2)">
