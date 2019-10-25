@@ -652,7 +652,34 @@ var script$5 = {
   props: {
     citymodel: Object,
     selected_objid: String,
-    object_colors: Object,
+    object_colors: {
+      type: Object,
+      default: function() {
+        return {
+          "Building": 0x7497df,
+          "BuildingPart": 0x7497df,
+          "BuildingInstallation": 0x7497df,
+          "Bridge": 0x999999,
+          "BridgePart": 0x999999,
+          "BridgeInstallation": 0x999999,
+          "BridgeConstructionElement": 0x999999,
+          "CityObjectGroup": 0xffffb3,
+          "CityFurniture": 0xcc0000,
+          "GenericCityObject": 0xcc0000,
+          "LandUse": 0xffffb3,
+          "PlantCover": 0x39ac39,
+          "Railway": 0x000000,
+          "Road": 0x999999,
+          "SolitaryVegetationObject": 0x39ac39,
+          "TINRelief": 0xffdb99,
+          "TransportSquare": 0x999999,
+          "Tunnel": 0x999999,
+          "TunnelPart": 0x999999,
+          "TunnelInstallation": 0x999999,
+          "WaterBody": 0x4da6ff
+        }
+      }
+    },
     background_color: {
       type: Number,
       default: 0xd9eefc
@@ -874,25 +901,12 @@ var script$5 = {
 
         this.camera_init = true;
       }
-
-      //count number of objects
-      // var totalco = Object.keys(json.CityObjects).length;
-      // console.log("Total # City Objects: ", totalco);
-      
-      //create dictionary
-      var children = {};
       
       //iterate through all cityObjects
       for (var cityObj in json.CityObjects) {
         
         // try {
-        //parse cityObj that it can be displayed in three js
-        var returnChildren = await this.parseObject(cityObj, json);
-        
-        //if object has children add them to the childrendict
-        for (i in returnChildren) {
-          children[returnChildren[i]] = cityObj;
-        }
+        await this.parseObject(cityObj, json);
           
         // } catch (e) {
         //   console.log("ERROR at creating: " + cityObj + "\n" + e.message);
@@ -917,11 +931,7 @@ var script$5 = {
       }
     },
     //convert json file to viwer-object
-    parseObject: async function parseObject(cityObj, json) {          
-      if (json.CityObjects[cityObj].children != undefined) {
-        return (json.CityObjects[cityObj].children)
-      }
-      
+    parseObject: async function parseObject(cityObj, json) {                
       //create geometry and empty list for the vertices
       var geom = new THREE.Geometry();
       
@@ -1133,7 +1143,7 @@ var __vue_staticRenderFns__$5 = [];
   /* scoped */
   var __vue_scope_id__$5 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$5 = "data-v-64b2552e";
+  var __vue_module_identifier__$5 = "data-v-f8c7bff6";
   /* functional template */
   var __vue_is_functional_template__$5 = false;
   /* style inject */
