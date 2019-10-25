@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { CityObjectCard } from './entry';
+import { CityObjectCard } from '../src/entry';
 
 import 'bootstrap/dist/css/bootstrap.css'
 // import 'bootstrap'
