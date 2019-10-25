@@ -258,25 +258,12 @@ export default {
 
         this.camera_init = true;
       }
-
-      //count number of objects
-      // var totalco = Object.keys(json.CityObjects).length;
-      // console.log("Total # City Objects: ", totalco);
-      
-      //create dictionary
-      var children = {}
       
       //iterate through all cityObjects
       for (var cityObj in json.CityObjects) {
         
         // try {
-        //parse cityObj that it can be displayed in three js
-        var returnChildren = await this.parseObject(cityObj, json)
-        
-        //if object has children add them to the childrendict
-        for (i in returnChildren) {
-          children[returnChildren[i]] = cityObj
-        }
+        await this.parseObject(cityObj, json)
           
         // } catch (e) {
         //   console.log("ERROR at creating: " + cityObj + "\n" + e.message);
@@ -301,11 +288,7 @@ export default {
       }
     },
     //convert json file to viwer-object
-    async parseObject(cityObj, json) {          
-      if (json.CityObjects[cityObj].children != undefined) {
-        return (json.CityObjects[cityObj].children)
-      }
-      
+    async parseObject(cityObj, json) {                
       //create geometry and empty list for the vertices
       var geom = new THREE.Geometry()
       
