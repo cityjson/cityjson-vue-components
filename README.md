@@ -1,5 +1,7 @@
 # CityJSON Vue components
 
+[![npm version](https://badge.fury.io/js/cityjson-vue-components.svg)](https://badge.fury.io/js/cityjson-vue-components)
+
 A collection of Vue components to work with CityJSON files.
 
 ## Installation
