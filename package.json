@@ -1,6 +1,6 @@
 {
   "name": "cityjson-vue-components",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A collection of Vue components for CityJSON",
   "main": "dist/cityjson-vue-components.ssr.js",
   "module": "dist/cityjson-vue-components.esm.js",
