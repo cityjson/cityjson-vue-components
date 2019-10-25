@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="d-flex justify-content-between">
+    <div class="d-flex justify-content-between align-items-center">
       <div class="text-secondary"><small><i :class="getIconStyle(cityobject)"></i> {{ cityobject.type }}</small></div>
       <div class="col-auto p-0" v-if="editable">
         <button class="btn btn-sm" :class="[ edit_mode ? 'btn-warning' : 'btn-outline-warning' ]" @click="edit_mode = !edit_mode"><i class="fas fa-pen mr-1"></i> {{ edit_mode ? 'Close edit' : 'Edit' }}</button>
@@ -47,7 +47,7 @@
           {{ this.cityobject.geometry.length }} Geometries
       </expandable-badge>
     </div>
-    <div v-show="hasAttributes && expanded || edit_mode">
+    <div v-show="expanded || edit_mode">
       <hr>
       <table class="table table-striped table-borderless overflow-auto" v-show="edit_mode == false && is_mode(1)" >
         <tbody>
