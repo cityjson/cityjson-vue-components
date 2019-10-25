@@ -10,8 +10,8 @@ var script = {
       default: false
     },
     expanded: {
-      type: Boolean,
-      default: false
+      type: Number,
+      default: 0
     }
   },
   data: function data() {
@@ -20,8 +20,14 @@ var script = {
     }
   },
   computed: {
+    attributesCount: function() {
+      return Object.keys(this.cityobject.attributes).length;
+    },
     hasAttributes: function() {
-      return "attributes" in this.cityobject && Object.keys(this.cityobject.attributes).length > 0;
+      return "attributes" in this.cityobject && this.attributesCount > 0;
+    },
+    hasGeometries: function() {
+      return this.cityobject.geometry;
     },
     iconType: function() {
       return this.getIconStyle(this.cityobject);
@@ -33,11 +39,31 @@ var script = {
     }
   },
   methods: {
+    toggle_mode: function toggle_mode(mode) {
+      if (this.expanded == mode)
+      {
+        this.expanded = 0;
+      }
+      else
+      {
+        this.expanded = mode;
+      }
+    },
+    is_mode: function is_mode(mode) {
+      return this.expanded == mode;
+    },
     select_this: function select_this() {
       this.$parent.$emit('object_clicked', this.cityobject_id);
     },
     getObject: function getObject(objid) {
-      return this.$parent.citymodel.CityObjects[objid];
+      if (this.$parent.citymodel)
+      {
+        return this.$parent.citymodel.CityObjects[objid];
+      }
+      else
+      {
+        return {};
+      }
     },
     getIconStyle: function getIconStyle(cityobj, with_colour) {
       if ( with_colour === void 0 ) with_colour=true;
@@ -83,9 +109,9 @@ var script = {
     saveChanges: function saveChanges() {
       var card_id = $.escapeSelector(this.cityobject_id);
       var new_json = $(("#" + card_id + " #json_data")).val();
-      this.cityobject = JSON.parse(new_json);
+      var new_cityobject = JSON.parse(new_json);
 
-      this.$emit('input', this.cityobject);
+      this.$emit('input', new_cityobject);
     }
   }
 };function normalizeComponent(template, style, script, scopeId, isFunctionalTemplate, moduleIdentifier
@@ -175,7 +201,7 @@ var normalizeComponent_1 = normalizeComponent;/* script */
 var __vue_script__ = script;
 
 /* template */
-var __vue_render__ = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"card mb-2",class:{ 'border-primary' : _vm.selected },attrs:{"id":_vm.cityobject_id}},[_vm._ssrNode("<div class=\"card-header\"><div class=\"d-flex justify-content-between\"><div class=\"text-truncate\"><a href=\"#\" id=\"objicon\""+(_vm._ssrAttr("title",_vm.cityobject.type))+"><i"+(_vm._ssrClass(null,_vm.iconType))+"></i></a> <a href=\"#\" class=\"text-dark text-decoration-none mr-5\">"+_vm._ssrEscape(_vm._s(_vm.cityobject_id))+"</a></div> <div class=\"col-auto p-0\">"+((_vm.hasAttributes)?("<a href=\"#\"><i"+(_vm._ssrClass("fas text-secondary mr-1",[ _vm.expanded ? 'fa-minus' : 'fa-plus' ]))+"></i></a>"):"<!---->")+" <a href=\"#\"><i"+(_vm._ssrClass("fas fa-pen mr-1",[ _vm.edit_mode ? 'text-dark' : 'text-secondary' ]))+"></i></a></div></div> <small"+(_vm._ssrStyle(null,null, { display: ('parents' in _vm.cityobject) ? '' : 'none' }))+">\n      Parents:\n      "+(_vm._ssrList((_vm.cityobject.parents),function(parent_id){return ("<a"+(_vm._ssrAttr("href",'#' + parent_id))+(_vm._ssrAttr("title",parent_id))+"><i"+(_vm._ssrClass("text-danger",_vm.getIconStyle(_vm.getObject(parent_id), false)))+"></i></a>")}))+"</small> <small"+(_vm._ssrStyle(null,null, { display: ('children' in _vm.cityobject) ? '' : 'none' }))+">\n      Children:\n      "+(_vm._ssrList((_vm.cityobject.children),function(child_id){return ("<a"+(_vm._ssrAttr("href",'#' + child_id))+(_vm._ssrAttr("title",child_id))+"><i"+(_vm._ssrClass("text-success",_vm.getIconStyle(_vm.getObject(child_id), false)))+"></i></a>")}))+"</small></div> "+((_vm.hasAttributes && _vm.expanded || _vm.edit_mode)?("<div"+(_vm._ssrAttr("id",_vm.cityobject_id + 'Body'))+" class=\"card-body collapse show\"><table class=\"table table-striped table-borderless overflow-auto\""+(_vm._ssrStyle(null,null, { display: (_vm.edit_mode == false) ? '' : 'none' }))+"><tbody>"+(_vm._ssrList((_vm.cityobject.attributes),function(value,key){return ("<tr><th scope=\"row\" class=\"py-1\"><small class=\"font-weight-bold\">"+_vm._ssrEscape(_vm._s(key))+"</small></th> <td class=\"py-1\"><small>"+_vm._ssrEscape(_vm._s(value))+"</small></td></tr>")}))+"</tbody></table> "+((_vm.edit_mode)?("<div><textarea id=\"json_data\" class=\"form-control\">"+_vm._ssrEscape(_vm._s(_vm.jsonString))+"</textarea> <div class=\"d-flex justify-content-end mt-2\"><button type=\"button\" class=\"btn btn-success btn-sm\">Save</button></div></div>"):"<!---->")+"</div>"):"<!---->"))])};
+var __vue_render__ = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"card mb-2",class:{ 'border-primary' : _vm.selected },attrs:{"id":_vm.cityobject_id}},[_vm._ssrNode("<div class=\"card-body\"><div class=\"d-flex justify-content-between\"><div class=\"font-weight-bold text-primary text-uppercase mb-2\">"+_vm._ssrEscape(_vm._s(_vm.cityobject.type))+"</div> <div class=\"col-auto p-0\"><button"+(_vm._ssrClass("btn btn-sm",[ _vm.edit_mode ? 'btn-warning' : 'btn-outline-warning' ]))+"><i class=\"fas fa-pen mr-1\"></i>"+_vm._ssrEscape(" "+_vm._s(_vm.edit_mode ? 'Close edit' : 'Edit'))+"</button></div></div> <h5 class=\"card-title text-truncate\">"+_vm._ssrEscape("\n      "+_vm._s(_vm.cityobject_id)+"\n    ")+"</h5> <div><small"+(_vm._ssrStyle(null,null, { display: ('parents' in _vm.cityobject) ? '' : 'none' }))+">\n        Parents:\n        "+(_vm._ssrList((_vm.cityobject.parents),function(parent_id){return ("<a"+(_vm._ssrAttr("href",'#' + parent_id))+(_vm._ssrAttr("title",parent_id))+"><i"+(_vm._ssrClass("text-danger",_vm.getIconStyle(_vm.getObject(parent_id), false)))+"></i></a>")}))+"</small> <small"+(_vm._ssrStyle(null,null, { display: ('children' in _vm.cityobject) ? '' : 'none' }))+">\n        Children:\n        "+(_vm._ssrList((_vm.cityobject.children),function(child_id){return ("<a"+(_vm._ssrAttr("href",'#' + child_id))+(_vm._ssrAttr("title",child_id))+"><i"+(_vm._ssrClass("text-success",_vm.getIconStyle(_vm.getObject(child_id), false)))+"></i></a>")}))+"</small></div> <div class=\"d-flex mt-2\">"+((_vm.hasAttributes)?("<div class=\"badge badge-pill badge-info mr-2\">"+((_vm.hasAttributes)?("<a href=\"#\" class=\"text-white text-decoration-none\">"+_vm._ssrEscape(_vm._s(_vm.attributesCount)+" Attributes ")+"<i"+(_vm._ssrClass("fas ml-1",[ !_vm.edit_mode && _vm.is_mode(1) ? 'fa-chevron-up' : 'fa-chevron-down' ]))+"></i></a>"):"<!---->")+"</div>"):"<!---->")+" "+((_vm.hasAttributes)?("<div class=\"badge badge-pill badge-danger mr-2\">"+((_vm.hasGeometries)?("<a href=\"#\" class=\"text-white text-decoration-none\">"+_vm._ssrEscape(_vm._s(this.cityobject.geometry.length)+" Geometries ")+"<i"+(_vm._ssrClass("fas ml-1",[ !_vm.edit_mode && _vm.is_mode(2) ? 'fa-chevron-up' : 'fa-chevron-down' ]))+"></i></a>"):"<!---->")+"</div>"):"<!---->")+"</div> "+((_vm.hasAttributes && _vm.expanded || _vm.edit_mode)?("<div><hr> <table class=\"table table-striped table-borderless overflow-auto\""+(_vm._ssrStyle(null,null, { display: (_vm.edit_mode == false && _vm.is_mode(1)) ? '' : 'none' }))+"><tbody>"+(_vm._ssrList((_vm.cityobject.attributes),function(value,key){return ("<tr><th scope=\"row\" class=\"py-1\"><small class=\"font-weight-bold\">"+_vm._ssrEscape(_vm._s(key))+"</small></th> <td class=\"py-1\"><small>"+_vm._ssrEscape(_vm._s(value))+"</small></td></tr>")}))+"</tbody></table> <div"+(_vm._ssrStyle(null,null, { display: (_vm.edit_mode == false && _vm.is_mode(2)) ? '' : 'none' }))+"><ul>"+(_vm._ssrList((_vm.cityobject.geometry),function(geom,i){return ("<li>"+_vm._ssrEscape(_vm._s(geom.type))+"</li>")}))+"</ul></div> "+((_vm.edit_mode)?("<div><textarea id=\"json_data\" class=\"form-control\">"+_vm._ssrEscape(_vm._s(_vm.jsonString))+"</textarea> <div class=\"d-flex justify-content-end mt-2\"><button type=\"button\" class=\"btn btn-success btn-sm\"><i class=\"fas fa-save mr-1\"></i> Save</button></div></div>"):"<!---->")+"</div>"):"<!---->")+"</div>")])};
 var __vue_staticRenderFns__ = [];
 
   /* style */
@@ -183,7 +209,7 @@ var __vue_staticRenderFns__ = [];
   /* scoped */
   var __vue_scope_id__ = undefined;
   /* module identifier */
-  var __vue_module_identifier__ = "data-v-1c042256";
+  var __vue_module_identifier__ = "data-v-7e8a83c6";
   /* functional template */
   var __vue_is_functional_template__ = false;
   /* style inject */
