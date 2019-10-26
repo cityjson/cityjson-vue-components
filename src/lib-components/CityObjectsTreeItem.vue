@@ -1,28 +1,20 @@
 <template>
   <li :id="cityobject_id">
-    <div>
-      <a href="#" @click="toggle" v-if="isFolder" class="mr-1">
-        <i class="far text-dark text-decoration-none" v-bind:class="[ isOpen ? 'fa-minus-square' : 'fa-plus-square' ]"></i>
-      </a>
-      <span v-else class="mr-1">
-        <i class="far fa-square text-secondary"></i>
-      </span>
-      <a href="#" id="objicon" :title="item.type"><i v-bind:class="iconType"></i></a>
-      <a href="#" class="text-dark text-decoration-none" @click="select_this"><span :class="{ 'text-primary' : selected }">{{ cityobject_id }}</span></a>
-      <a
-        href="#"
-        class="badge badge-primary mr-1"
-        v-for="(geom, i) in singleGeometries"
+    <div class="d-flex flex-inline align-items-center">
+      <div class="d-flex justify-content-center" style="width: 20px">
+        <a href="#" @click="toggle" v-if="isFolder" class="mr-1">
+          <i class="fas text-dark text-decoration-none" v-bind:class="[ isOpen ? 'fa-chevron-down' : 'fa-chevron-right' ]"></i>
+        </a>
+      </div>
+      <div class="object-icon d-flex justify-content-center">
+        <a href="#" id="objicon" :title="item.type"><i v-bind:class="iconType"></i></a>
+      </div>
+      <a href="#" class="text-dark text-decoration-none mr-1" @click="select_this"><span :class="{ 'text-primary' : selected }">{{ cityobject_id }}</span></a>
+      <geometry-badge
+        v-for="(geom, i) in item.geometry"
         :key="i"
-        :title="geom.type">
-          <i :class="getGeometryIcon(geom.type)" class="mr-1"></i><small>{{ geom.lod }}</small>
-      </a>
-      <span
-        class="badge badge-secondary mr-1"
-        v-for="(geom, i) in geometryInstances"
-        :key="i">
-        <i class="fas fa-external-link-alt"></i>
-      </span>
+        :geometry="geom"
+      ></geometry-badge>
     </div>
     <ul class="list-unstyled ml-4 mb-0" v-show="isOpen" v-if="isFolder">
       <CityObjectsTreeItem
@@ -40,8 +32,13 @@
 <script>
 import _ from 'lodash'
 
+import GeometryBadge from './common/GeometryBadge.vue'
+
 export default {
   name: 'CityObjectsTreeItem',
+  components: {
+    GeometryBadge
+  },
   props: {
     item: Object,
     cityobject_id: String,
@@ -155,3 +152,9 @@ export default {
   }
 }
 </script>
+
+<style>
+.object-icon {
+  width: 24px;
+}
+</style>
