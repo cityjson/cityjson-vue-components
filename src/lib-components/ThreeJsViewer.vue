@@ -288,7 +288,13 @@ export default {
       }
     },
     //convert json file to viwer-object
-    async parseObject(cityObj, json) {                
+    async parseObject(cityObj, json) {
+      if (!(json.CityObjects[cityObj].geometry &&
+        json.CityObjects[cityObj].geometry.length > 0))
+      {
+        return;
+      }
+   
       //create geometry and empty list for the vertices
       var geom = new THREE.Geometry()
       
