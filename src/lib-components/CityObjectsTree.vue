@@ -19,7 +19,16 @@ export default {
   components: {
     CityObjectsTreeItem
   },
-  props: ['cityobjects', 'selected_objid', 'matches'],
+  props: {
+    cityobjects: Object,
+    selected_objid: String,
+    matches: {
+      type: Function,
+      default: function() {
+        return true;
+      }
+    }
+  },
   computed: {
     citymodel: function() {
       return this.$parent.citymodel;
