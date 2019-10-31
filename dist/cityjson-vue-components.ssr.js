@@ -447,9 +447,68 @@ var __vue_staticRenderFns__$2 = [];
     undefined,
     undefined
   );//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 var script$3 = {
+  name: 'GeometryBadge',
+  props: {
+    geometry: Object
+  }
+};/* script */
+var __vue_script__$3 = script$3;
+
+/* template */
+var __vue_render__$3 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_vm._ssrNode("<small>"+((_vm.geometry.type != 'GeometryInstance')?("<a href=\"#\""+(_vm._ssrAttr("title",_vm.geometry.type))+" class=\"badge badge-pill bg-transparent border border-primary text-primary mr-1\">"+_vm._ssrEscape("\n        LoD"+_vm._s(_vm.geometry.lod)+"\n    ")+"</a>"):("<span class=\"badge badge-pill bg-transparent border border-secondary text-secondary mr-1\"><i class=\"fas fa-external-link-alt\"></i></span>"))+"</small>")])};
+var __vue_staticRenderFns__$3 = [];
+
+  /* style */
+  var __vue_inject_styles__$3 = undefined;
+  /* scoped */
+  var __vue_scope_id__$3 = undefined;
+  /* module identifier */
+  var __vue_module_identifier__$3 = "data-v-221f450f";
+  /* functional template */
+  var __vue_is_functional_template__$3 = false;
+  /* style inject */
+  
+  /* style inject SSR */
+  
+
+  
+  var GeometryBadge = normalizeComponent_1(
+    { render: __vue_render__$3, staticRenderFns: __vue_staticRenderFns__$3 },
+    __vue_inject_styles__$3,
+    __vue_script__$3,
+    __vue_scope_id__$3,
+    __vue_is_functional_template__$3,
+    __vue_module_identifier__$3,
+    undefined,
+    undefined
+  );//
+
+var script$4 = {
   name: 'CityObjectsTreeItem',
+  components: {
+    GeometryBadge: GeometryBadge
+  },
   props: {
     item: Object,
     cityobject_id: String,
@@ -565,44 +624,103 @@ var script$3 = {
       }
     },
   }
-};/* script */
-var __vue_script__$3 = script$3;
+};function createInjectorSSR(context) {
+  if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
+    context = __VUE_SSR_CONTEXT__;
+  }
+
+  if (!context) { return function () {}; }
+
+  if (!('styles' in context)) {
+    context._styles = context._styles || {};
+    Object.defineProperty(context, 'styles', {
+      enumerable: true,
+      get: function get() {
+        return context._renderStyles(context._styles);
+      }
+    });
+    context._renderStyles = context._renderStyles || renderStyles;
+  }
+
+  return function (id, style) {
+    return addStyle(id, style, context);
+  };
+}
+
+function addStyle(id, css, context) {
+  var group =  css.media || 'default' ;
+  var style = context._styles[group] || (context._styles[group] = {
+    ids: [],
+    css: ''
+  });
+
+  if (!style.ids.includes(id)) {
+    style.media = css.media;
+    style.ids.push(id);
+    var code = css.source;
+
+    style.css += code + '\n';
+  }
+}
+
+function renderStyles(styles) {
+  var css = '';
+
+  for (var key in styles) {
+    var style = styles[key];
+    css += '<style data-vue-ssr-id="' + Array.from(style.ids).join(' ') + '"' + (style.media ? ' media="' + style.media + '"' : '') + '>' + style.css + '</style>';
+  }
+
+  return css;
+}
+
+var server = createInjectorSSR;/* script */
+var __vue_script__$4 = script$4;
 
 /* template */
-var __vue_render__$3 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('li',{attrs:{"id":_vm.cityobject_id}},[_vm._ssrNode("<div>"+((_vm.isFolder)?("<a href=\"#\" class=\"mr-1\"><i"+(_vm._ssrClass("far text-dark text-decoration-none",[ _vm.isOpen ? 'fa-minus-square' : 'fa-plus-square' ]))+"></i></a>"):("<span class=\"mr-1\"><i class=\"far fa-square text-secondary\"></i></span>"))+" <a href=\"#\" id=\"objicon\""+(_vm._ssrAttr("title",_vm.item.type))+"><i"+(_vm._ssrClass(null,_vm.iconType))+"></i></a> <a href=\"#\" class=\"text-dark text-decoration-none\"><span"+(_vm._ssrClass(null,{ 'text-primary' : _vm.selected }))+">"+_vm._ssrEscape(_vm._s(_vm.cityobject_id))+"</span></a> "+(_vm._ssrList((_vm.singleGeometries),function(geom,i){return ("<a href=\"#\""+(_vm._ssrAttr("title",geom.type))+" class=\"badge badge-primary mr-1\"><i"+(_vm._ssrClass("mr-1",_vm.getGeometryIcon(geom.type)))+"></i><small>"+_vm._ssrEscape(_vm._s(geom.lod))+"</small></a>")}))+" "+(_vm._ssrList((_vm.geometryInstances),function(geom,i){return ("<span class=\"badge badge-secondary mr-1\"><i class=\"fas fa-external-link-alt\"></i></span>")}))+"</div> "),(_vm.isFolder)?_vm._ssrNode("<ul class=\"list-unstyled ml-4 mb-0\""+(_vm._ssrStyle(null,null, { display: (_vm.isOpen) ? '' : 'none' }))+">","</ul>",_vm._l((_vm.item.children),function(child_id){return _c('CityObjectsTreeItem',{key:child_id,staticClass:"item",attrs:{"item":_vm.getObject(child_id),"cityobject_id":child_id,"selected_objid":_vm.selected_objid}})}),1):_vm._e()],2)};
-var __vue_staticRenderFns__$3 = [];
+var __vue_render__$4 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('li',{attrs:{"id":_vm.cityobject_id}},[_vm._ssrNode("<div class=\"d-flex flex-inline align-items-center\">","</div>",[_vm._ssrNode("<div class=\"d-flex justify-content-center\" style=\"width: 20px\">"+((_vm.isFolder)?("<a href=\"#\" class=\"mr-1\"><i"+(_vm._ssrClass("fas text-dark text-decoration-none",[ _vm.isOpen ? 'fa-chevron-down' : 'fa-chevron-right' ]))+"></i></a>"):"<!---->")+"</div> <div class=\"object-icon d-flex justify-content-center\"><a href=\"#\" id=\"objicon\""+(_vm._ssrAttr("title",_vm.item.type))+"><i"+(_vm._ssrClass(null,_vm.iconType))+"></i></a></div> <a href=\"#\" class=\"text-dark text-decoration-none mr-1\"><span"+(_vm._ssrClass(null,{ 'text-primary' : _vm.selected }))+">"+_vm._ssrEscape(_vm._s(_vm.cityobject_id))+"</span></a> "),_vm._l((_vm.item.geometry),function(geom,i){return _c('geometry-badge',{key:i,attrs:{"geometry":geom}})})],2),_vm._ssrNode(" "),(_vm.isFolder)?_vm._ssrNode("<ul class=\"list-unstyled ml-4 mb-0\""+(_vm._ssrStyle(null,null, { display: (_vm.isOpen) ? '' : 'none' }))+">","</ul>",_vm._l((_vm.item.children),function(child_id){return _c('CityObjectsTreeItem',{key:child_id,staticClass:"item",attrs:{"item":_vm.getObject(child_id),"cityobject_id":child_id,"selected_objid":_vm.selected_objid}})}),1):_vm._e()],2)};
+var __vue_staticRenderFns__$4 = [];
 
   /* style */
-  var __vue_inject_styles__$3 = undefined;
+  var __vue_inject_styles__$4 = function (inject) {
+    if (!inject) { return }
+    inject("data-v-a829c0d0_0", { source: ".object-icon{width:24px}", map: undefined, media: undefined });
+
+  };
   /* scoped */
-  var __vue_scope_id__$3 = undefined;
+  var __vue_scope_id__$4 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$3 = "data-v-65afc79c";
+  var __vue_module_identifier__$4 = "data-v-a829c0d0";
   /* functional template */
-  var __vue_is_functional_template__$3 = false;
-  /* style inject */
-  
-  /* style inject SSR */
-  
+  var __vue_is_functional_template__$4 = false;
 
   
   var CityObjectsTreeItem = normalizeComponent_1(
-    { render: __vue_render__$3, staticRenderFns: __vue_staticRenderFns__$3 },
-    __vue_inject_styles__$3,
-    __vue_script__$3,
-    __vue_scope_id__$3,
-    __vue_is_functional_template__$3,
-    __vue_module_identifier__$3,
+    { render: __vue_render__$4, staticRenderFns: __vue_staticRenderFns__$4 },
+    __vue_inject_styles__$4,
+    __vue_script__$4,
+    __vue_scope_id__$4,
+    __vue_is_functional_template__$4,
+    __vue_module_identifier__$4,
     undefined,
-    undefined
+    server
   );//
 
-var script$4 = {
+var script$5 = {
   name: 'CityObjectsTree',
   components: {
     CityObjectsTreeItem: CityObjectsTreeItem
   },
-  props: ['cityobjects', 'selected_objid', 'matches'],
+  props: {
+    cityobjects: Object,
+    selected_objid: String,
+    matches: {
+      type: Function,
+      default: function() {
+        return true;
+      }
+    }
+  },
   computed: {
     citymodel: function() {
       return this.$parent.citymodel;
@@ -616,20 +734,20 @@ var script$4 = {
     });
   },
 };/* script */
-var __vue_script__$4 = script$4;
+var __vue_script__$5 = script$5;
 
 /* template */
-var __vue_render__$4 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('ul',{staticClass:"list-unstyled overflow-auto px-3"},_vm._l((_vm.cityobjects),function(cityobject,coid){return _c('CityObjectsTreeItem',{directives:[{name:"show",rawName:"v-show",value:(_vm.matches(coid, cityobject)),expression:"matches(coid, cityobject)"}],key:coid,attrs:{"item":cityobject,"cityobject_id":coid,"selected_objid":_vm.selected_objid}})}),1)};
-var __vue_staticRenderFns__$4 = [];
+var __vue_render__$5 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('ul',{staticClass:"list-unstyled overflow-auto px-3"},_vm._l((_vm.cityobjects),function(cityobject,coid){return _c('CityObjectsTreeItem',{directives:[{name:"show",rawName:"v-show",value:(_vm.matches(coid, cityobject)),expression:"matches(coid, cityobject)"}],key:coid,attrs:{"item":cityobject,"cityobject_id":coid,"selected_objid":_vm.selected_objid}})}),1)};
+var __vue_staticRenderFns__$5 = [];
 
   /* style */
-  var __vue_inject_styles__$4 = undefined;
+  var __vue_inject_styles__$5 = undefined;
   /* scoped */
-  var __vue_scope_id__$4 = undefined;
+  var __vue_scope_id__$5 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$4 = "data-v-297d0c6c";
+  var __vue_module_identifier__$5 = "data-v-70bfde4d";
   /* functional template */
-  var __vue_is_functional_template__$4 = false;
+  var __vue_is_functional_template__$5 = false;
   /* style inject */
   
   /* style inject SSR */
@@ -637,17 +755,17 @@ var __vue_staticRenderFns__$4 = [];
 
   
   var CityObjectsTree = normalizeComponent_1(
-    { render: __vue_render__$4, staticRenderFns: __vue_staticRenderFns__$4 },
-    __vue_inject_styles__$4,
-    __vue_script__$4,
-    __vue_scope_id__$4,
-    __vue_is_functional_template__$4,
-    __vue_module_identifier__$4,
+    { render: __vue_render__$5, staticRenderFns: __vue_staticRenderFns__$5 },
+    __vue_inject_styles__$5,
+    __vue_script__$5,
+    __vue_scope_id__$5,
+    __vue_is_functional_template__$5,
+    __vue_module_identifier__$5,
     undefined,
     undefined
   );//
 
-var script$5 = {
+var script$6 = {
   name: 'ThreeJsViewer',
   props: {
     citymodel: Object,
@@ -931,7 +1049,13 @@ var script$5 = {
       }
     },
     //convert json file to viwer-object
-    parseObject: async function parseObject(cityObj, json) {                
+    parseObject: async function parseObject(cityObj, json) {
+      if (!(json.CityObjects[cityObj].geometry &&
+        json.CityObjects[cityObj].geometry.length > 0))
+      {
+        return;
+      }
+   
       //create geometry and empty list for the vertices
       var geom = new THREE.Geometry();
       
@@ -1132,20 +1256,20 @@ var script$5 = {
             }
           }
 };/* script */
-var __vue_script__$5 = script$5;
+var __vue_script__$6 = script$6;
 
 /* template */
-var __vue_render__$5 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"col-12 px-0 h-100",attrs:{"id":"viewer"}},[])};
-var __vue_staticRenderFns__$5 = [];
+var __vue_render__$6 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"col-12 px-0 h-100",attrs:{"id":"viewer"}},[])};
+var __vue_staticRenderFns__$6 = [];
 
   /* style */
-  var __vue_inject_styles__$5 = undefined;
+  var __vue_inject_styles__$6 = undefined;
   /* scoped */
-  var __vue_scope_id__$5 = undefined;
+  var __vue_scope_id__$6 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$5 = "data-v-f8c7bff6";
+  var __vue_module_identifier__$6 = "data-v-0b64d998";
   /* functional template */
-  var __vue_is_functional_template__$5 = false;
+  var __vue_is_functional_template__$6 = false;
   /* style inject */
   
   /* style inject SSR */
@@ -1153,12 +1277,12 @@ var __vue_staticRenderFns__$5 = [];
 
   
   var ThreeJsViewer = normalizeComponent_1(
-    { render: __vue_render__$5, staticRenderFns: __vue_staticRenderFns__$5 },
-    __vue_inject_styles__$5,
-    __vue_script__$5,
-    __vue_scope_id__$5,
-    __vue_is_functional_template__$5,
-    __vue_module_identifier__$5,
+    { render: __vue_render__$6, staticRenderFns: __vue_staticRenderFns__$6 },
+    __vue_inject_styles__$6,
+    __vue_script__$6,
+    __vue_scope_id__$6,
+    __vue_is_functional_template__$6,
+    __vue_module_identifier__$6,
     undefined,
     undefined
   );/* eslint-disable import/prefer-default-export */var components=/*#__PURE__*/Object.freeze({__proto__:null,CityObjectCard: CityObjectCard,CityObjectInfo: CityObjectInfo,CityObjectsTree: CityObjectsTree,CityObjectsTreeItem: CityObjectsTreeItem,ThreeJsViewer: ThreeJsViewer});// Import vue components
