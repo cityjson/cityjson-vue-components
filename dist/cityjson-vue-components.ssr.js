@@ -420,7 +420,7 @@ var script$2 = {
 var __vue_script__$2 = script$2;
 
 /* template */
-var __vue_render__$2 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"card mb-2",class:{ 'border-primary' : _vm.selected },attrs:{"id":_vm.cityobject_id}},[_vm._ssrNode("<div class=\"card-body\">","</div>",[_c('CityObjectInfo',{attrs:{"cityobject":_vm.cityobject,"cityobject_id":_vm.cityobject_id,"editable":"true"}})],1)])};
+var __vue_render__$2 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"card mb-2",class:{ 'border-primary' : _vm.selected },attrs:{"id":_vm.cityobject_id}},[_vm._ssrNode("<div class=\"card-body\">","</div>",[_c('CityObjectInfo',{attrs:{"cityobject":_vm.cityobject,"cityobject_id":_vm.cityobject_id,"editable":"true"},on:{"input":_vm.saveChanges}})],1)])};
 var __vue_staticRenderFns__$2 = [];
 
   /* style */
@@ -428,7 +428,7 @@ var __vue_staticRenderFns__$2 = [];
   /* scoped */
   var __vue_scope_id__$2 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$2 = "data-v-7a118b33";
+  var __vue_module_identifier__$2 = "data-v-62a65b2c";
   /* functional template */
   var __vue_is_functional_template__$2 = false;
   /* style inject */
