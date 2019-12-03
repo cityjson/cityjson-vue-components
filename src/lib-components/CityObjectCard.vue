@@ -1,7 +1,7 @@
 <template>
   <div class="card mb-2" :id="cityobject_id" :class="{ 'border-primary' : selected }">
     <div class="card-body">
-      <CityObjectInfo :cityobject="cityobject" :cityobject_id="cityobject_id" editable="true"></CityObjectInfo>
+      <CityObjectInfo :cityobject="cityobject" :cityobject_id="cityobject_id" @input="saveChanges" editable="true"></CityObjectInfo>
     </div>
   </div>
 </template>
