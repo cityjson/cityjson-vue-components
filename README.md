@@ -59,3 +59,14 @@ To build a new version run: `npm run build`. The output files are located in `di
 For more information you may read:
 - the official cookbook [recipe](https://vuejs.org/v2/cookbook/packaging-sfc-for-npm.html) of Vue.js of how to bundle components for npm, or
 - the [vue-sfc-rollup](https://github.com/team-innovation/vue-sfc-rollup) template upon which this repository is based.
+
+
+### useful links
+http://geovalidation.bk.tudelft.nl/val3dity/docs/definitions/
+https://www.cityjson.org/specs/1.0.1/#geometry-objects
+https://www.cityjson.org/specs/1.0.1/#texture-object
+https://pypi.org/project/cjio/
+
+
+### How to run things locally
+https://threejs.org/docs/#manual/en/introduction/How-to-run-things-locally

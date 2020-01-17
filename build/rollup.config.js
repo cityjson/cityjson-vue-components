@@ -13,7 +13,7 @@ const baseConfig = {
   plugins: {
     preVue: [
       replace({
-        'process.env.NODE_ENV': JSON.stringify('production'),
+        'process.env.NODE_ENV': JSON.stringify('production')
       }),
       commonjs(),
     ],
