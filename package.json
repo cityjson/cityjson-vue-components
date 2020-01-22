@@ -20,6 +20,8 @@
     "!src/lib-dev.vue"
   ],
   "scripts": {
+    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+    "serve":"vue-cli-service serve",
     "build": "cross-env NODE_ENV=production rollup --config build/rollup.config.js",
     "build:ssr": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format cjs",
     "build:es": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format es",
@@ -27,13 +29,16 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.11.2",
+    "axios": "^0.19.1",
     "bootstrap": "^4.3.1",
     "earcut": "^2.2.1",
     "jquery": "^3.4.1",
+    "json-parse-better-errors": "^1.0.2",
     "lodash": "^4.17.15",
     "popper": "^1.0.1",
     "three": "^0.109.0",
-    "three-orbitcontrols": "^2.108.1"
+    "three-orbitcontrols": "^2.108.1",
+    "vue-axios": "^2.1.5"
   },
   "devDependencies": {
     "cross-env": "^5.2.0",
@@ -45,6 +50,8 @@
     "rollup-plugin-terser": "^4.0.4",
     "rollup-plugin-vue": "^5.0.0",
     "vue": "^2.6.10",
-    "vue-template-compiler": "^2.6.10"
+    "vue-template-compiler": "^2.6.10",
+    "webpack": "^2.1.0-beta.22",
+    "webpack-cli": "^3.3.10"
   }
 }

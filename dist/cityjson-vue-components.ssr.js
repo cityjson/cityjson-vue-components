@@ -1,4 +1,4 @@
-'use strict';Object.defineProperty(exports,'__esModule',{value:true});function _interopDefault(e){return(e&&(typeof e==='object')&&'default'in e)?e['default']:e}var $=_interopDefault(require('jquery')),_=_interopDefault(require('lodash')),THREE=require('three'),OrbitControls=_interopDefault(require('three-orbitcontrols')),earcut=_interopDefault(require('earcut'));//
+'use strict';Object.defineProperty(exports,'__esModule',{value:true});function _interopDefault(e){return(e&&(typeof e==='object')&&'default'in e)?e['default']:e}var $=_interopDefault(require('jquery')),_=_interopDefault(require('lodash')),THREE=require('three'),OrbitControls=_interopDefault(require('three-orbitcontrols')),earcut=_interopDefault(require('earcut')),axios=_interopDefault(require('axios')),VueAxios=_interopDefault(require('vue-axios'));//
 //
 //
 //
@@ -129,7 +129,7 @@ var __vue_staticRenderFns__ = [];
   /* scoped */
   var __vue_scope_id__ = undefined;
   /* module identifier */
-  var __vue_module_identifier__ = "data-v-dd1a1ade";
+  var __vue_module_identifier__ = "data-v-60479a24";
   /* functional template */
   var __vue_is_functional_template__ = false;
   /* style inject */
@@ -279,7 +279,7 @@ var __vue_staticRenderFns__$1 = [];
   /* scoped */
   var __vue_scope_id__$1 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$1 = "data-v-a369aeda";
+  var __vue_module_identifier__$1 = "data-v-5eb6aaa1";
   /* functional template */
   var __vue_is_functional_template__$1 = false;
   /* style inject */
@@ -428,7 +428,7 @@ var __vue_staticRenderFns__$2 = [];
   /* scoped */
   var __vue_scope_id__$2 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$2 = "data-v-62a65b2c";
+  var __vue_module_identifier__$2 = "data-v-5214c4cf";
   /* functional template */
   var __vue_is_functional_template__$2 = false;
   /* style inject */
@@ -484,7 +484,7 @@ var __vue_staticRenderFns__$3 = [];
   /* scoped */
   var __vue_scope_id__$3 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$3 = "data-v-221f450f";
+  var __vue_module_identifier__$3 = "data-v-50b7b6a0";
   /* functional template */
   var __vue_is_functional_template__$3 = false;
   /* style inject */
@@ -684,13 +684,13 @@ var __vue_staticRenderFns__$4 = [];
   /* style */
   var __vue_inject_styles__$4 = function (inject) {
     if (!inject) { return }
-    inject("data-v-a829c0d0_0", { source: ".object-icon{width:24px}", map: undefined, media: undefined });
+    inject("data-v-af4821be_0", { source: ".object-icon{width:24px}", map: undefined, media: undefined });
 
   };
   /* scoped */
   var __vue_scope_id__$4 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$4 = "data-v-a829c0d0";
+  var __vue_module_identifier__$4 = "data-v-af4821be";
   /* functional template */
   var __vue_is_functional_template__$4 = false;
 
@@ -745,7 +745,7 @@ var __vue_staticRenderFns__$5 = [];
   /* scoped */
   var __vue_scope_id__$5 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$5 = "data-v-70bfde4d";
+  var __vue_module_identifier__$5 = "data-v-3218df82";
   /* functional template */
   var __vue_is_functional_template__$5 = false;
   /* style inject */
@@ -1267,7 +1267,7 @@ var __vue_staticRenderFns__$6 = [];
   /* scoped */
   var __vue_scope_id__$6 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$6 = "data-v-0b64d998";
+  var __vue_module_identifier__$6 = "data-v-5e9476f4";
   /* functional template */
   var __vue_is_functional_template__$6 = false;
   /* style inject */
@@ -1285,7 +1285,563 @@ var __vue_staticRenderFns__$6 = [];
     __vue_module_identifier__$6,
     undefined,
     undefined
-  );/* eslint-disable import/prefer-default-export */var components=/*#__PURE__*/Object.freeze({__proto__:null,CityObjectCard: CityObjectCard,CityObjectInfo: CityObjectInfo,CityObjectsTree: CityObjectsTree,CityObjectsTreeItem: CityObjectsTreeItem,ThreeJsViewer: ThreeJsViewer});// Import vue components
+  );//
+
+var script$7 = {
+  name: "TextureViewer",
+  props: {
+    citymodel: Object,
+    selected_objid: String,
+    object_colors: {
+      type: Object,
+      default: function() {
+        return {
+          Building: 0x7497df,
+          BuildingPart: 0x7497df,
+          BuildingInstallation: 0x7497df,
+          Bridge: 0x999999,
+          BridgePart: 0x999999,
+          BridgeInstallation: 0x999999,
+          BridgeConstructionElement: 0x999999,
+          CityObjectGroup: 0xffffb3,
+          CityFurniture: 0xcc0000,
+          GenericCityObject: 0xcc0000,
+          LandUse: 0xffffb3,
+          PlantCover: 0x39ac39,
+          Railway: 0x000000,
+          Road: 0x999999,
+          SolitaryVegetationObject: 0x39ac39,
+          TINRelief: 0xffdb99,
+          TransportSquare: 0x999999,
+          Tunnel: 0x999999,
+          TunnelPart: 0x999999,
+          TunnelInstallation: 0x999999,
+          WaterBody: 0x4da6ff
+        };
+      }
+    },
+    background_color: {
+      type: Number,
+      default: 0xd9eefc
+    }
+  },
+  data: function data() {
+    return {
+      camera_init: false
+    };
+  },
+  beforeCreate: function beforeCreate() {
+    this.scene = null;
+    this.camera = null;
+    this.renderer = null;
+    this.controls = null;
+    this.raycaster = null;
+    this.mouse = null;
+    this.geoms = {};
+    this.meshes = [];
+    this.mesh_index = {};
+  },
+  mounted: async function mounted() {
+    var this$1 = this;
+
+    this.$parent.$emit("rendering", true);
+
+    setTimeout(async function () {
+      this$1.initScene();
+
+      if (Object.keys(this$1.citymodel).length > 0) {
+        await this$1.loadCityObjects(this$1.citymodel);
+      }
+
+      this$1.renderer.render(this$1.scene, this$1.camera);
+
+      var self = this$1;
+
+      $("#viewer").dblclick(function(eventData) {
+        if (eventData.button == 0) {
+          //leftClick
+          self.handleClick();
+        }
+      });
+
+      this$1.$parent.$emit("rendering", false);
+    }, 25);
+  },
+  watch: {
+    background_color: function(newVal) {
+      this.renderer.setClearColor(newVal);
+
+      this.renderer.render(this.scene, this.camera);
+    },
+    object_colors: {
+      handler: function(newVal) {
+        for (var i = 0; i < this.meshes.length; i++)
+          { this.meshes[i].material.color.setHex(
+            newVal[this.citymodel.CityObjects[this.meshes[i].name].type]
+          ); }
+
+        this.renderer.render(this.scene, this.camera);
+      },
+      deep: true
+    },
+    citymodel: {
+      handler: async function(newVal) {
+        var this$1 = this;
+
+        this.$parent.$emit("rendering", true);
+
+        setTimeout(async function () {
+          this$1.clearScene();
+
+          if (Object.keys(newVal).length > 0) {
+            await this$1.loadCityObjects(newVal);
+          }
+
+          this$1.renderer.render(this$1.scene, this$1.camera);
+
+          this$1.$parent.$emit("rendering", false);
+        }, 25);
+      },
+      deep: true
+    },
+    selected_objid: function(newId, oldId) {
+      if (oldId != null) {
+        var coType = this.citymodel.CityObjects[oldId].type;
+        this.mesh_index[oldId].material.color.setHex(
+          this.object_colors[coType]
+        );
+      }
+
+      if (newId != null) {
+        this.mesh_index[newId].material.color.setHex(0xdda500);
+      }
+
+      this.renderer.render(this.scene, this.camera);
+    }
+  },
+  methods: {
+    handleClick: function handleClick() {
+      var rect = this.renderer.domElement.getBoundingClientRect();
+      //get mouseposition
+      this.mouse.x =
+        ((event.clientX - rect.left) / this.renderer.domElement.clientWidth) *
+          2 -
+        1;
+      this.mouse.y =
+        -((event.clientY - rect.top) / this.renderer.domElement.clientHeight) *
+          2 +
+        1;
+
+      //get cameraposition
+      this.raycaster.setFromCamera(this.mouse, this.camera);
+
+      //calculate intersects
+      var intersects = this.raycaster.intersectObjects(this.meshes);
+
+      //if clicked on nothing return
+      if (intersects.length == 0) {
+        this.$parent.$emit("object_clicked", null);
+        return;
+      }
+
+      //get the id of the first object that intersects (equals the clicked object)
+      var cityObjId = intersects[0].object.name;
+      this.$parent.$emit("object_clicked", cityObjId);
+    },
+    initScene: function initScene() {
+      this.scene = new THREE.Scene();
+      var ratio = $("#viewer").width() / $("#viewer").height();
+      this.camera = new THREE.PerspectiveCamera(60, ratio, 0.001, 1000);
+      this.camera.up.set(0, 0, 1);
+
+      this.renderer = new THREE.WebGLRenderer({
+        antialias: true
+      });
+      var viewer = document.getElementById("viewer");
+      viewer.appendChild(this.renderer.domElement);
+      this.renderer.setSize($("#viewer").width(), $("#viewer").height());
+      this.renderer.setClearColor(this.background_color);
+      this.renderer.shadowMap.enabled = true;
+      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+      var self = this;
+
+      // add raycaster and mouse (for clickable objects)
+      this.raycaster = new THREE.Raycaster();
+      this.mouse = new THREE.Vector2();
+
+      //add AmbientLight (light that is only there that there's a minimum of light and you can see color)
+      //kind of the natural daylight
+      var am_light = new THREE.AmbientLight(0xffffff, 0.7); // soft white light
+      this.scene.add(am_light);
+
+      // Add directional light
+      var spot_light = new THREE.SpotLight(0xdddddd);
+      spot_light.position.set(84616, -1, 447422);
+      spot_light.target = this.scene;
+      spot_light.castShadow = true;
+      spot_light.intensity = 0.4;
+      spot_light.position.normalize();
+      this.scene.add(spot_light);
+
+      //render & orbit controls
+      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+      this.controls.addEventListener("change", function() {
+        self.renderer.render(self.scene, self.camera);
+      });
+    },
+    clearScene: function clearScene() {
+      while (this.scene.children.length > 0) {
+        this.scene.remove(this.scene.children[0]);
+      }
+
+      var am_light = new THREE.AmbientLight(0xffffff, 0.7); // soft white light
+      this.scene.add(am_light);
+
+      // Add directional light
+      var spot_light = new THREE.SpotLight(0xdddddd);
+      spot_light.position.set(84616, -1, 447422);
+      spot_light.target = this.scene;
+      spot_light.castShadow = true;
+      spot_light.intensity = 0.4;
+      spot_light.position.normalize();
+      this.scene.add(spot_light);
+    },
+    //convert CityObjects to mesh and add them to the viewer
+    loadCityObjects: async function loadCityObjects(json) {
+      //create one geometry that contains all vertices (in normalized form)
+      //normalize must be done for all coordinates as otherwise the objects are at same pos and have the same size
+      var normGeom = new THREE.Geometry();
+      var i;
+      for (i = 0; i < json.vertices.length; i++) {
+        var point = new THREE.Vector3(
+          json.vertices[i][0],
+          json.vertices[i][1],
+          json.vertices[i][2]
+        );
+        normGeom.vertices.push(point);
+      }
+      normGeom.normalize();
+
+      for (i = 0; i < json.vertices.length; i++) {
+        json.vertices[i][0] = normGeom.vertices[i].x;
+        json.vertices[i][1] = normGeom.vertices[i].y;
+        json.vertices[i][2] = normGeom.vertices[i].z;
+      }
+
+      var stats = this.getStats(json.vertices);
+      var avgX = stats[3];
+      var avgY = stats[4];
+      var avgZ = stats[5];
+
+      if (!this.camera_init) {
+        this.camera.position.set(0, 0, 2);
+        this.camera.lookAt(avgX, avgY, avgZ);
+
+        this.controls.target.set(avgX, avgY, avgZ);
+
+        //enable movement parallel to ground
+        this.controls.screenSpacePanning = true;
+
+        this.camera_init = true;
+      }
+
+      //iterate through all cityObjects
+      for (var cityObj in json.CityObjects) {
+        // try {
+        await this.parseObject(cityObj, json);
+      }
+    },
+    //convert json file to viwer-object
+    parseObject: async function parseObject(cityObj, json) {
+      if (
+        !(
+          json.CityObjects[cityObj].geometry &&
+          json.CityObjects[cityObj].geometry.length > 0
+        )
+      ) {
+        return;
+      }
+
+      //create geometry and empty list for the vertices
+      var geom = new THREE.Geometry();
+
+      //each geometrytype must be handled different
+      var geomType = json.CityObjects[cityObj].geometry[0].type;
+      var boundaries = [];
+      if (geomType == "Solid") {
+        boundaries = json.CityObjects[cityObj].geometry[0].boundaries[0];
+      } else if (geomType == "MultiSurface" || geomType == "CompositeSurface") {
+        boundaries = json.CityObjects[cityObj].geometry[0].boundaries;
+      } else if (geomType == "MultiSolid" || geomType == "CompositeSolid") {
+        boundaries = json.CityObjects[cityObj].geometry[0].boundaries;
+      }
+
+      //needed for assocation of global and local vertices
+      var verticeId = 0;
+
+      var vertices = []; //local vertices
+      var boundary = [];
+
+      // get all texture information of all cityobjects
+      var all_textures = json.appearance;
+      // get texture information of one CityObject
+      var textures =
+        json.CityObjects[cityObj].geometry[0].texture["rgbTexture"].values;
+      //contains the boundary but with the right verticeId
+      var i;
+      var j;
+      var matArray = [];
+      for (i = 0; i < boundaries.length; i++) {
+        // texture path
+        var img_src;
+        if (all_textures["textures"][textures[i][0][0]] == null) { img_src = null; }
+        else { img_src = all_textures["textures"][textures[i][0][0]]["image"]; }
+
+        // create a texture loader.
+        var textureLoader = new THREE.TextureLoader();
+
+        // Load a texture. See the note in chapter 4 on working locally, or the page
+
+        // const texture = textureLoader.load(
+        //   "http://localhost:5050/data/" + img_src
+        // );
+        window.console.log(img_src);
+        var texture = textureLoader.load("red.jpg");
+
+        this.$http
+          .get(
+            "https://3d.bk.tudelft.nl/opendata/cityjson/1.0/3-20-DELFSHAVEN.json"
+          )
+          .then(function (response) {
+            window.console.log(response);
+          })
+          .catch(function (response) {
+            window.console.log(response);
+          });
+        // // set the "color space" of the texture
+        texture.encoding = THREE.sRGBEncoding;
+
+        // // create a Standard material using the texture we just loaded as a color map
+        matArray.push(
+          new THREE.MeshStandardMaterial({
+            map: texture
+          })
+        );
+
+        var uvs = [];
+        for (j = 0; j < boundaries[i][0].length; j++) {
+          //the original index from the json file
+          var index = boundaries[i][0][j];
+
+          //if this index is already there
+          if (vertices.includes(index)) {
+            var vertPos = vertices.indexOf(index);
+            boundary.push(vertPos);
+          } else {
+            //add vertice to geometry
+            var point = new THREE.Vector3(
+              json.vertices[index][0],
+              json.vertices[index][1],
+              json.vertices[index][2]
+            );
+            geom.vertices.push(point);
+            if (textures[i][0][0] == null) {
+              uvs.push(null);
+            } else {
+              var coordinates =
+                all_textures["vertices-texture"][textures[i][0][j + 1]];
+              uvs.push(coordinates);
+            }
+            vertices.push(index);
+            boundary.push(verticeId);
+
+            verticeId = verticeId + 1;
+          }
+        }
+
+        //create face
+        //triangulated faces
+        if (boundary.length == 3) {
+          geom.faces.push(
+            new THREE.Face3(boundary[0], boundary[1], boundary[2], i)
+          );
+          geom.faceVertexUvs[geom.faces.length] = uvs;
+          //non triangulated faces
+        } else if (boundary.length > 3) {
+          //create list of points
+          var pList = [];
+          for (j = 0; j < boundary.length; j++) {
+            pList.push({
+              x: json.vertices[vertices[boundary[j]]][0],
+              y: json.vertices[vertices[boundary[j]]][1],
+              z: json.vertices[vertices[boundary[j]]][2]
+            });
+          }
+          //get normal of these points
+          var normal = await this.get_normal_newell(pList);
+
+          //convert to 2d (for triangulation)
+          var pv = [];
+          for (j = 0; j < pList.length; j++) {
+            var re = await this.to_2d(pList[j], normal);
+            pv.push(re.x);
+            pv.push(re.y);
+          }
+
+          //triangulate
+          var tr = await earcut(pv, null, 2);
+          window.console.log(tr);
+
+          //create faces based on triangulation
+          for (j = 0; j < tr.length; j += 3) {
+            geom.faces.push(
+              new THREE.Face3(
+                boundary[tr[j]],
+                boundary[tr[j + 1]],
+                boundary[tr[j + 2]],
+                i
+              )
+            );
+          }
+        }
+
+        //create mesh
+        //geoms[cityObj].normalize()
+        var _id = cityObj;
+        this.geoms[_id] = geom;
+        var coMesh = new THREE.Mesh(this.geoms[_id], matArray);
+
+        coMesh.name = cityObj;
+        coMesh.castShadow = true;
+        coMesh.receiveShadow = true;
+        this.scene.add(coMesh);
+        this.meshes.push(coMesh);
+        this.mesh_index[_id] = coMesh;
+
+        //reset boundaries
+        boundary = [];
+      }
+
+      //needed for shadow
+      geom.computeFaceNormals();
+
+      //add geom to the list
+
+      // geom.faceVertexUvs;
+      return "";
+    },
+    getStats: function getStats(vertices) {
+      var minX = Number.MAX_VALUE;
+      var minY = Number.MAX_VALUE;
+      var minZ = Number.MAX_VALUE;
+
+      var sumX = 0;
+      var sumY = 0;
+      var sumZ = 0;
+      var counter = 0;
+
+      for (var i in vertices) {
+        sumX = sumX + vertices[i][0];
+        if (vertices[i][0] < minX) {
+          minX = vertices[i][0];
+        }
+
+        sumY = sumY + vertices[i][1];
+        if (vertices[i][1] < minY) {
+          minY = vertices[i][1];
+        }
+
+        if (vertices[i][2] < minZ) {
+          minZ = vertices[i][2];
+        }
+
+        sumZ = sumZ + vertices[i][2];
+        counter = counter + 1;
+      }
+
+      var avgX = sumX / counter;
+      var avgY = sumY / counter;
+      var avgZ = sumZ / counter;
+
+      return [minX, minY, minZ, avgX, avgY, avgZ];
+    },
+    //-- calculate normal of a set of points
+    get_normal_newell: function get_normal_newell(indices) {
+      // find normal with Newell's method
+      var n = [0.0, 0.0, 0.0];
+
+      for (var i = 0; i < indices.length; i++) {
+        var nex = i + 1;
+
+        if (nex == indices.length) {
+          nex = 0;
+        }
+
+        n[0] =
+          n[0] +
+          (indices[i].y - indices[nex].y) * (indices[i].z + indices[nex].z);
+        n[1] =
+          n[1] +
+          (indices[i].z - indices[nex].z) * (indices[i].x + indices[nex].x);
+        n[2] =
+          n[2] +
+          (indices[i].x - indices[nex].x) * (indices[i].y + indices[nex].y);
+      }
+
+      var b = new THREE.Vector3(n[0], n[1], n[2]);
+      return b.normalize();
+    },
+    to_2d: function to_2d(p, n) {
+      p = new THREE.Vector3(p.x, p.y, p.z);
+      var x3 = new THREE.Vector3(1.1, 1.1, 1.1);
+      if (x3.distanceTo(n) < 0.01) {
+        x3.add(new THREE.Vector3(1.0, 2.0, 3.0));
+      }
+      var tmp = x3.dot(n);
+      var tmp2 = n.clone();
+      tmp2.multiplyScalar(tmp);
+      x3.sub(tmp2);
+      x3.normalize();
+      var y3 = n.clone();
+      y3.cross(x3);
+      var x = p.dot(x3);
+      var y = p.dot(y3);
+      var re = { x: x, y: y };
+      return re;
+    }
+  }
+};/* script */
+var __vue_script__$7 = script$7;
+
+/* template */
+var __vue_render__$7 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"col-12 px-0 h-100",attrs:{"id":"viewer"}},[])};
+var __vue_staticRenderFns__$7 = [];
+
+  /* style */
+  var __vue_inject_styles__$7 = undefined;
+  /* scoped */
+  var __vue_scope_id__$7 = undefined;
+  /* module identifier */
+  var __vue_module_identifier__$7 = "data-v-7ec3a292";
+  /* functional template */
+  var __vue_is_functional_template__$7 = false;
+  /* style inject */
+  
+  /* style inject SSR */
+  
+
+  
+  var TextureViewer = normalizeComponent_1(
+    { render: __vue_render__$7, staticRenderFns: __vue_staticRenderFns__$7 },
+    __vue_inject_styles__$7,
+    __vue_script__$7,
+    __vue_scope_id__$7,
+    __vue_is_functional_template__$7,
+    __vue_module_identifier__$7,
+    undefined,
+    undefined
+  );/* eslint-disable import/prefer-default-export */var components=/*#__PURE__*/Object.freeze({__proto__:null,CityObjectCard: CityObjectCard,CityObjectInfo: CityObjectInfo,CityObjectsTree: CityObjectsTree,CityObjectsTreeItem: CityObjectsTreeItem,ThreeJsViewer: ThreeJsViewer,TextureViewer: TextureViewer});// Import vue components
 
 // install function executed by Vue.use()
 function install(Vue) {
@@ -1311,4 +1867,6 @@ if (typeof window !== 'undefined') {
 }
 if (GlobalVue) {
   GlobalVue.use(CityJSONComponents);
-}exports.CityObjectCard=CityObjectCard;exports.CityObjectInfo=CityObjectInfo;exports.CityObjectsTree=CityObjectsTree;exports.CityObjectsTreeItem=CityObjectsTreeItem;exports.ThreeJsViewer=ThreeJsViewer;exports.default=CityJSONComponents;
+  GlobalVue.use(VueAxios,axios);
+
+}exports.CityObjectCard=CityObjectCard;exports.CityObjectInfo=CityObjectInfo;exports.CityObjectsTree=CityObjectsTree;exports.CityObjectsTreeItem=CityObjectsTreeItem;exports.TextureViewer=TextureViewer;exports.ThreeJsViewer=ThreeJsViewer;exports.default=CityJSONComponents;

@@ -2,11 +2,12 @@
   <div id="viewer" class="col-12 px-0 h-100"></div>
 </template>
 
-<script>
+<script crossorigin="anonymous">
 import $ from "jquery";
 import * as THREE from "three";
 import OrbitControls from "three-orbitcontrols";
 import earcut from "earcut";
+import axios from "axios";
 
 export default {
   name: "TextureViewer",
@@ -267,6 +268,34 @@ export default {
       for (var cityObj in json.CityObjects) {
         // try {
         await this.parseObject(cityObj, json);
+
+        axios({
+          url: "api/examples/data/appearances/red.jpg",
+          method: "get"
+        })
+          .then(response => {
+            console.log(response);
+          })
+          .catch(error => {});
+
+        var texture = new THREE.TextureLoader().load(
+          "api/examples/data/appearances/red.jpg"
+        );
+        // create a Standard material using the texture we just loaded as a color map
+        const material = new THREE.MeshStandardMaterial({
+          map: texture
+        });
+
+        window.console.log(material);
+
+        var _id = cityObj;
+        var coMesh = new THREE.Mesh(this.geoms[_id], material);
+        coMesh.name = cityObj;
+        coMesh.castShadow = true;
+        coMesh.receiveShadow = true;
+        this.scene.add(coMesh);
+        this.meshes.push(coMesh);
+        this.mesh_index[_id] = coMesh;
       }
     },
     //convert json file to viwer-object
@@ -309,28 +338,15 @@ export default {
       //contains the boundary but with the right verticeId
       var i;
       var j;
-      var matArray = [];
       for (i = 0; i < boundaries.length; i++) {
-        // texture path
-        var img_src=all_textures["textures"][textures[i][0][0]]["image"];
+        var img_src;         // texture path
+  
+        if (all_textures["textures"][textures[i][0][0]] == null) img_src = null;
+        else img_src = all_textures["textures"][textures[i][0][0]]["image"];
 
-        // create a texture loader.
-        const textureLoader = new THREE.TextureLoader();
+        window.console.log(img_src);
+        var uvs = [];         // UV coordinates
 
-        // Load a texture. See the note in chapter 4 on working locally, or the page
-        const texture = textureLoader.load(
-          "http://localhost:5050/data/"+img_src
-        );
-
-        // // set the "color space" of the texture
-        texture.encoding = THREE.sRGBEncoding;
-
-        // // create a Standard material using the texture we just loaded as a color map
-        matArray.push(new THREE.MeshStandardMaterial({
-          map: texture
-        }));
-
-        var uvs=[];
         for (j = 0; j < boundaries[i][0].length; j++) {
           //the original index from the json file
           var index = boundaries[i][0][j];
@@ -351,7 +367,8 @@ export default {
             if (textures[i][0][0] == null) {
               uvs.push(null);
             } else {
-              var coordinates=all_textures["vertices-texture"][textures[i][0][j + 1]];
+              var coordinates =
+                all_textures["vertices-texture"][textures[i][0][j + 1]];
               uvs.push(coordinates);
             }
             vertices.push(index);
@@ -368,7 +385,7 @@ export default {
           geom.faces.push(
             new THREE.Face3(boundary[0], boundary[1], boundary[2], i)
           );
-          geom.faceVertexUvs[geom.faces.length]=uvs;
+          geom.faceVertexUvs[geom.faces.length] = uvs;
           //non triangulated faces
         } else if (boundary.length > 3) {
           //create list of points
@@ -393,7 +410,6 @@ export default {
 
           //triangulate
           var tr = await earcut(pv, null, 2);
-          window.console.log(tr)
 
           //create faces based on triangulation
           for (j = 0; j < tr.length; j += 3) {
@@ -408,29 +424,18 @@ export default {
           }
         }
 
+        // create a texture loader.
 
-
-        //create mesh
-        //geoms[cityObj].normalize()
-        var _id = cityObj;
-        this.geoms[_id] = geom;
-        var coMesh = new THREE.Mesh(this.geoms[_id], matArray);
-
-        coMesh.name = cityObj;
-        coMesh.castShadow = true;
-        coMesh.receiveShadow = true;
-        this.scene.add(coMesh);
-        this.meshes.push(coMesh);
-        this.mesh_index[_id] = coMesh;
-
-       //reset boundaries
+        //reset boundaries
         boundary = [];
       }
 
       //needed for shadow
       geom.computeFaceNormals();
-      
+
       //add geom to the list
+      var _id = cityObj;
+      this.geoms[_id] = geom;
 
       // geom.faceVertexUvs;
       return "";

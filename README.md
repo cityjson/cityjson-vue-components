@@ -62,11 +62,11 @@ For more information you may read:
 
 
 ### useful links
-http://geovalidation.bk.tudelft.nl/val3dity/docs/definitions/
-https://www.cityjson.org/specs/1.0.1/#geometry-objects
-https://www.cityjson.org/specs/1.0.1/#texture-object
-https://pypi.org/project/cjio/
+http://geovalidation.bk.tudelft.nl/val3dity/docs/definitions/  
+https://www.cityjson.org/specs/1.0.1/#geometry-objects  
+https://www.cityjson.org/specs/1.0.1/#texture-object  
+https://pypi.org/project/cjio/  
 
 
 ### How to run things locally
-https://threejs.org/docs/#manual/en/introduction/How-to-run-things-locally
+https://threejs.org/docs/#manual/en/introduction/How-to-run-things-locally  

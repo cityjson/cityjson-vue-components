@@ -1,5 +1,8 @@
 // Import vue components
 import * as components from './lib-components/index';
+import Vue from 'vue'
+import axios from 'axios'
+
 
 // install function executed by Vue.use()
 function install(Vue) {
@@ -25,6 +28,8 @@ if (typeof window !== 'undefined') {
 }
 if (GlobalVue) {
   GlobalVue.use(CityJSONComponents);
+  GlobalVue.prototype.$http = axios;
+
 }
 
 // Default export is library as a whole, registered via Vue.use()
