@@ -265,37 +265,11 @@ export default {
       }
 
       //iterate through all cityObjects
+      var count = 0;
       for (var cityObj in json.CityObjects) {
         // try {
         await this.parseObject(cityObj, json);
-
-        axios({
-          url: "api/examples/data/appearances/red.jpg",
-          method: "get"
-        })
-          .then(response => {
-            console.log(response);
-          })
-          .catch(error => {});
-
-        var texture = new THREE.TextureLoader().load(
-          "api/examples/data/appearances/red.jpg"
-        );
-        // create a Standard material using the texture we just loaded as a color map
-        const material = new THREE.MeshStandardMaterial({
-          map: texture
-        });
-
-        window.console.log(material);
-
-        var _id = cityObj;
-        var coMesh = new THREE.Mesh(this.geoms[_id], material);
-        coMesh.name = cityObj;
-        coMesh.castShadow = true;
-        coMesh.receiveShadow = true;
-        this.scene.add(coMesh);
-        this.meshes.push(coMesh);
-        this.mesh_index[_id] = coMesh;
+        //if (count == 20) break;
       }
     },
     //convert json file to viwer-object
@@ -329,6 +303,7 @@ export default {
       var vertices = []; //local vertices
       var indices = []; //global vertices
       var boundary = [];
+      var uvs = []; // corresponding to boundary
 
       // get all texture information of all cityobjects
       var all_textures = json.appearance;
@@ -338,105 +313,128 @@ export default {
       //contains the boundary but with the right verticeId
       var i;
       var j;
+      var materials = [];
+      var texture;
       for (i = 0; i < boundaries.length; i++) {
-        var img_src;         // texture path
-  
-        if (all_textures["textures"][textures[i][0][0]] == null) img_src = null;
-        else img_src = all_textures["textures"][textures[i][0][0]]["image"];
-
-        window.console.log(img_src);
-        var uvs = [];         // UV coordinates
-
-        for (j = 0; j < boundaries[i][0].length; j++) {
-          //the original index from the json file
-          var index = boundaries[i][0][j];
-
-          //if this index is already there
-          if (vertices.includes(index)) {
-            var vertPos = vertices.indexOf(index);
-            indices.push(vertPos);
-            boundary.push(vertPos);
-          } else {
-            //add vertice to geometry
-            var point = new THREE.Vector3(
-              json.vertices[index][0],
-              json.vertices[index][1],
-              json.vertices[index][2]
-            );
-            geom.vertices.push(point);
-            if (textures[i][0][0] == null) {
-              uvs.push(null);
-            } else {
-              var coordinates =
-                all_textures["vertices-texture"][textures[i][0][j + 1]];
-              uvs.push(coordinates);
-            }
-            vertices.push(index);
-            indices.push(verticeId);
-            boundary.push(verticeId);
-
-            verticeId = verticeId + 1;
-          }
+        var img_src; // texture path
+        var img = all_textures["textures"][textures[i][0][0]];
+        if (img == null) img_src = "api/examples/data/appearances/red.jpg";
+        else {
+          img_src =
+            "api/examples/data/" +
+            all_textures["textures"][textures[i][0][0]]["image"];
         }
-
-        //create face
-        //triangulated faces
-        if (boundary.length == 3) {
-          geom.faces.push(
-            new THREE.Face3(boundary[0], boundary[1], boundary[2], i)
-          );
-          geom.faceVertexUvs[geom.faces.length] = uvs;
-          //non triangulated faces
-        } else if (boundary.length > 3) {
-          //create list of points
-          var pList = [];
-          for (j = 0; j < boundary.length; j++) {
-            pList.push({
-              x: json.vertices[vertices[boundary[j]]][0],
-              y: json.vertices[vertices[boundary[j]]][1],
-              z: json.vertices[vertices[boundary[j]]][2]
-            });
-          }
-          //get normal of these points
-          var normal = await this.get_normal_newell(pList);
-
-          //convert to 2d (for triangulation)
-          var pv = [];
-          for (j = 0; j < pList.length; j++) {
-            var re = await this.to_2d(pList[j], normal);
-            pv.push(re.x);
-            pv.push(re.y);
-          }
-
-          //triangulate
-          var tr = await earcut(pv, null, 2);
-
-          //create faces based on triangulation
-          for (j = 0; j < tr.length; j += 3) {
-            geom.faces.push(
-              new THREE.Face3(
-                boundary[tr[j]],
-                boundary[tr[j + 1]],
-                boundary[tr[j + 2]],
-                i
+        texture=new THREE.TextureLoader().load(img_src);
+        materials.push(
+          new THREE.MeshStandardMaterial({
+            map: texture
+          })
+        );
+        texture.needsUpdate=true;
+        if (img) {
+          for (j = 0; j < boundaries[i][0].length; j++) {
+            //the original index from the json file
+            var index = boundaries[i][0][j];
+            var uv = JSON.parse(
+              JSON.stringify(
+                all_textures["vertices-texture"][textures[i][0][j + 1]]
               )
             );
+            uvs.push(new THREE.Vector2(uv[0], uv[1]));
+
+            //if this index is already there
+            if (vertices.includes(index)) {
+              var vertPos = vertices.indexOf(index);
+              indices.push(vertPos);
+              boundary.push(vertPos);
+            } else {
+              //add vertice to geometry
+              var point = new THREE.Vector3(
+                json.vertices[index][0],
+                json.vertices[index][1],
+                json.vertices[index][2]
+              );
+              geom.vertices.push(point);
+
+              vertices.push(index);
+              indices.push(verticeId);
+              boundary.push(verticeId);
+
+              verticeId = verticeId + 1;
+            }
           }
+          //create face
+          //triangulated faces
+
+          if (boundary.length == 3) {
+            var face = new THREE.Face3(boundary[0], boundary[1], boundary[2]);
+            face.materialIndex = i;
+            geom.faces.push(face);
+            geom.faceVertexUvs[0].push([uvs]); //non triangulated faces
+          } else if (boundary.length > 3) {
+            //create list of points
+            var pList = [];
+            for (j = 0; j < boundary.length; j++) {
+              pList.push({
+                x: json.vertices[vertices[boundary[j]]][0],
+                y: json.vertices[vertices[boundary[j]]][1],
+                z: json.vertices[vertices[boundary[j]]][2]
+              });
+            }
+            //get normal of these points
+            var normal = await this.get_normal_newell(pList);
+
+            //convert to 2d (for triangulation)
+            var pv = [];
+            for (j = 0; j < pList.length; j++) {
+              var re = await this.to_2d(pList[j], normal);
+              pv.push(re.x);
+              pv.push(re.y);
+            }
+
+            //triangulate
+            var tr = await earcut(pv, null, 2);
+
+            //create faces based on triangulation
+            for (j = 0; j < tr.length; j += 3) {
+              var face = new THREE.Face3(
+                boundary[tr[j]],
+                boundary[tr[j + 1]],
+                boundary[tr[j + 2]]
+              );
+              face.materialIndex = i;
+              geom.faces.push(face);
+
+              geom.faceVertexUvs[0].push([
+                uvs[tr[j]],
+                uvs[tr[j + 1]],
+                uvs[tr[j + 2]]
+              ]);
+            }
+          }
+
+          // create a texture loader.
+          //reset boundaries
+          boundary = [];
+          uvs = [];
         }
-
-        // create a texture loader.
-
-        //reset boundaries
-        boundary = [];
       }
-
       //needed for shadow
       geom.computeFaceNormals();
 
       //add geom to the list
       var _id = cityObj;
       this.geoms[_id] = geom;
+  
 
+      var coMesh = new THREE.Mesh(geom, materials);
+      materials
+      coMesh.name = cityObj;
+      coMesh.castShadow = true;
+      coMesh.receiveShadow = true;
+      this.scene.add(coMesh);
+      this.meshes.push(coMesh);
+      this.mesh_index[_id] = coMesh;
       // geom.faceVertexUvs;
       return "";
     },
