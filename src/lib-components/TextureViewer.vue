@@ -268,9 +268,10 @@ export default {
       var count = 0;
       for (var cityObj in json.CityObjects) {
         // try {
+
         await this.parseObject(cityObj, json);
         count++;
-        if (count == 100) break;
+        if (count == 20) break;
       }
     },
     //convert json file to viwer-object
