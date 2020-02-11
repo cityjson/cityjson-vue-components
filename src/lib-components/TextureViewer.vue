@@ -8,6 +8,11 @@ import * as THREE from "three";
 import OrbitControls from "three-orbitcontrols";
 import earcut from "earcut";
 import axios from "axios";
+import { BufferGeometryUtils } from '../../BufferGeometryUtils.js';
+
+var singleGeometry = new THREE.BufferGeometry();
+var allmateri = [];
+const myGroup = new THREE.Group();
 
 export default {
   name: "TextureViewer",
@@ -62,6 +67,7 @@ export default {
     this.geoms = {};
     this.meshes = [];
     this.mesh_index = {};
+    this.geometries = [];
   },
   async mounted() {
     this.$parent.$emit("rendering", true);
@@ -266,13 +272,32 @@ export default {
 
       //iterate through all cityObjects
       var count = 0;
+
       for (var cityObj in json.CityObjects) {
         // try {
 
         await this.parseObject(cityObj, json);
         count++;
-        if (count == 20) break;
+        //if (count == 20) break;
       }
+
+      var bf_geo = BufferGeometryUtils.mergeBufferGeometries(
+        this.geometries,true
+      );
+window.console.log(bf_geo);
+window.console.log(allmateri);
+
+      var texture = new THREE.TextureLoader().load("api/examples/data/appearances/wb.png");
+
+        var material = new THREE.MeshBasicMaterial({
+          map: texture
+        });
+
+      var coMesh = new THREE.Mesh(
+        bf_geo,
+        allmateri
+      );
+      this.scene.add(coMesh);
     },
     //convert json file to viwer-object
     async parseObject(cityObj, json) {
@@ -287,6 +312,7 @@ export default {
 
       //create geometry and empty list for the vertices
       var geom = new THREE.Geometry();
+      var idx_material = allmateri.length;
 
       //each geometrytype must be handled different
       var geomType = json.CityObjects[cityObj].geometry[0].type;
@@ -315,23 +341,26 @@ export default {
       //contains the boundary but with the right verticeId
       var i;
       var j;
-      var materials = [];
+      //var materials = [];
+
       var texture;
+      var material;
       for (i = 0; i < boundaries.length; i++) {
         var img_src; // texture path
         var img = all_textures["textures"][textures[i][0][0]];
         if (img == null) img_src = "api/examples/data/appearances/ground.jpg";
         else {
-          img_src =
-            "api/examples/data/" +
-            all_textures["textures"][textures[i][0][0]]["image"];
+          img_src = "api/examples/data/" + img["image"];
         }
         texture = new THREE.TextureLoader().load(img_src);
-        materials.push(
-          new THREE.MeshStandardMaterial({
-            map: texture
-          })
-        );
+        texture.needsUpdate = true;
+
+        material = new THREE.MeshBasicMaterial({
+          map: texture
+        });
+        material.needsUpdate = true;
+
+        allmateri.push(material);
         if (img) {
           for (j = 0; j < boundaries[i][0].length; j++) {
             //the original index from the json file
@@ -369,7 +398,7 @@ export default {
 
           if (boundary.length == 3) {
             var face = new THREE.Face3(boundary[0], boundary[1], boundary[2]);
-            face.materialIndex = i;
+            face.materialIndex = idx_material;
             geom.faces.push(face);
             geom.faceVertexUvs[0].push([uvs]); //non triangulated faces
           } else if (boundary.length > 3) {
@@ -403,7 +432,7 @@ export default {
                 boundary[tr[j + 1]],
                 boundary[tr[j + 2]]
               );
-              face.materialIndex = i;
+              face.materialIndex = idx_material;
               geom.faces.push(face);
 
               geom.faceVertexUvs[0].push([
@@ -449,7 +478,7 @@ export default {
 
           if (boundary.length == 3) {
             var face = new THREE.Face3(boundary[0], boundary[1], boundary[2]);
-            face.materialIndex = i;
+            face.materialIndex = idx_material;
             geom.faces.push(face);
             geom.faceVertexUvs[0].push([(0, 0), (0, 1), (1, 0)]);
           } else if (boundary.length > 3) {
@@ -483,7 +512,7 @@ export default {
                 boundary[tr[j + 1]],
                 boundary[tr[j + 2]]
               );
-              face.materialIndex = i;
+              face.materialIndex = idx_material;
               geom.faces.push(face);
               geom.faceVertexUvs[0].push([(0, 0), (0, 1), (1, 0)]);
             }
@@ -501,16 +530,25 @@ export default {
       //add geom to the list
       var _id = cityObj;
       this.geoms[_id] = geom;
+      // var mesh = new THREE.Mesh(geom);
+      // mesh.updateMatrix();
+      // var nodeGeometry = geom.clone()
+      // singleGeometry.merge(nodeGeometry);
 
-      var coMesh = new THREE.Mesh(geom, materials);
+      // var myMesh = new THREE.Mesh(geom, materials);
+      // myGroup.add(myMesh);
+      // myMesh.frustumCulled = false;
+      var buffergeo=new THREE.BufferGeometry().fromGeometry(geom);
+     // window.console.log(buffergeo);
+      this.geometries.push(buffergeo);
 
-      coMesh.name = cityObj;
-      coMesh.castShadow = true;
-      coMesh.receiveShadow = true;
-      this.scene.add(coMesh);
-      this.meshes.push(coMesh);
-      this.mesh_index[_id] = coMesh;
-      window.console.log(geom);
+      // coMesh.name = cityObj;
+      // coMesh.castShadow = true;
+      // coMesh.receiveShadow = true;
+      // this.scene.add(coMesh);
+      // this.meshes.push(coMesh);
+      // this.mesh_index[_id] = coMesh;
+      // window.console.log(geom);
       return "";
     },
     getStats(vertices) {
