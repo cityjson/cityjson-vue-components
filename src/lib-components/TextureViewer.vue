@@ -291,6 +291,8 @@ export default {
         })
       );
 
+
+
       for (var cityObj in json.CityObjects) {
         // try {
 
