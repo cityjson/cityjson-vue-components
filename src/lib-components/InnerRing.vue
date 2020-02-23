@@ -274,9 +274,11 @@ export default {
         // }
 
         //set color of object
-        var coType = json.CityObjects[cityObj].type;
+        // var coType = json.CityObjects[cityObj].type;
         var material = new THREE.MeshLambertMaterial();
-        material.color.setHex(this.object_colors[coType]);
+
+            material = new THREE.MeshBasicMaterial( { vertexColors: THREE.FaceColors } );
+
 
         //create mesh
         //geoms[cityObj].normalize()
@@ -329,7 +331,6 @@ export default {
       var t;
       for (i = 0; i < boundaries.length; i++) {
         var inner_positions = 0;
-
         for (j = 0; j < boundaries[i].length; j++) {
           var count = 0;
           for (t = 0; t < boundaries[i][j].length; t++) {
@@ -362,13 +363,14 @@ export default {
             inner_positions++;
           }
         }
+
         //create face
         //triangulated faces
         var b_length = boundary.length;
         if (b_length == 3) {
-          geom.faces.push(
-            new THREE.Face3(boundary[0], boundary[1], boundary[2])
-          );
+          var face = new THREE.Face3(boundary[0], boundary[1], boundary[2]);
+          face.color.setHex(Math.random() * 0xffffff);
+          geom.faces.push(face);
 
           //non triangulated faces
         } else if (b_length > 3) {
@@ -400,13 +402,13 @@ export default {
 
           //create faces based on triangulation
           for (j = 0; j < tr.length; j += 3) {
-            geom.faces.push(
-              new THREE.Face3(
-                boundary[tr[j]],
-                boundary[tr[j + 1]],
-                boundary[tr[j + 2]]
-              )
+            var face = new THREE.Face3(
+              boundary[tr[j]],
+              boundary[tr[j + 1]],
+              boundary[tr[j + 2]]
             );
+            face.color.setHex(Math.random() * 0xffffff);
+            geom.faces.push(face);
           }
         }
         // //reset boundaries
@@ -419,6 +421,17 @@ export default {
       //add geom to the list
       var _id = cityObj;
       this.geoms[_id] = geom;
+      var edge = new THREE.EdgesGeometry(geom);
+
+      var mat = new THREE.LineBasicMaterial({
+        color: 0x000000,
+        linewidth: 0.1,
+        transparent: true,
+        opacity: 0.2
+      });
+      var wireframe = new THREE.LineSegments(edge, mat);
+      wireframe.name = "wireframe";
+      this.scene.add(wireframe);
 
       return "";
     },
