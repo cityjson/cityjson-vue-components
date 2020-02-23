@@ -5,3 +5,4 @@ export { default as CityObjectsTree } from './CityObjectsTree.vue';
 export { default as CityObjectsTreeItem } from './CityObjectsTreeItem.vue';
 export { default as ThreeJsViewer } from './ThreeJsViewer.vue';
 export { default as TextureViewer } from './TextureViewer.vue';
+export { default as InnerRing } from './InnerRing.vue';
