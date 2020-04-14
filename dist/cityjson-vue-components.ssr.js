@@ -1058,20 +1058,45 @@ var script$6 = {
    
       //create geometry and empty list for the vertices
       var geom = new THREE.Geometry();
+      var vertices = []; // List of global indices in this surface
       
       //each geometrytype must be handled different
       var geomType = json.CityObjects[cityObj].geometry[0].type;
-      var boundaries = [];
+      
+      var i;
+      var j;
       if (geomType == "Solid") {
-        boundaries = json.CityObjects[cityObj].geometry[0].boundaries[0];
+        var shells = json.CityObjects[cityObj].geometry[0].boundaries;
+
+        for (i = 0; i < shells.length; i++)
+        {
+          await this.parseShell(geom, shells[i], vertices, json);
+        }
       } else if (geomType == "MultiSurface" || geomType == "CompositeSurface") {
-        boundaries = json.CityObjects[cityObj].geometry[0].boundaries;
+        var surfaces = json.CityObjects[cityObj].geometry[0].boundaries;
+
+        await this.parseShell(geom, surfaces, vertices, json);
       } else if (geomType == "MultiSolid" || geomType == "CompositeSolid") {
-        boundaries = json.CityObjects[cityObj].geometry[0].boundaries;
+        var solids = json.CityObjects[cityObj].geometry[0].boundaries;
+
+        for (i = 0; i < solids.length; i++) {
+          for (j = 0; j < solids[i].length; j++) {
+            await this.parseShell(geom, solids[i][j], vertices, json);
+          }
+        }
       }
+            
+      //needed for shadow
+      geom.computeFaceNormals();
       
-      var vertices = []; // List of global indices in this surface
+      //add geom to the list
+      var _id = cityObj;
+      this.geoms[_id] = geom;
       
+      return ("")
+    },
+    parseShell: async function parseShell(geom, boundaries, vertices, json)
+    {
       // Contains the boundary but with the right verticeId
       var i; // 
       var j;
@@ -1129,15 +1154,6 @@ var script$6 = {
           }
         }
       }
-            
-      //needed for shadow
-      geom.computeFaceNormals();
-      
-      //add geom to the list
-      var _id = cityObj;
-      this.geoms[_id] = geom;
-      
-      return ("")
     },
     extractLocalIndices: function extractLocalIndices(geom, boundary, indices, json)
     {
@@ -1154,7 +1170,6 @@ var script$6 = {
           new_boundary.push(vertPos);
         }
         else {
-          
           // Add vertex to geometry
           var point = new THREE.Vector3(
             json.vertices[index][0],
@@ -1259,7 +1274,7 @@ var __vue_staticRenderFns__$6 = [];
   /* scoped */
   var __vue_scope_id__$6 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$6 = "data-v-0156819e";
+  var __vue_module_identifier__$6 = "data-v-524d6512";
   /* functional template */
   var __vue_is_functional_template__$6 = false;
   /* style inject */
