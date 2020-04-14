@@ -297,20 +297,43 @@ export default {
    
       //create geometry and empty list for the vertices
       var geom = new THREE.Geometry()
+      var vertices = [] // List of global indices in this surface
       
       //each geometrytype must be handled different
       var geomType = json.CityObjects[cityObj].geometry[0].type
-      var boundaries = [];
+      
       if (geomType == "Solid") {
-        boundaries = json.CityObjects[cityObj].geometry[0].boundaries[0];
+        var shells = json.CityObjects[cityObj].geometry[0].boundaries;
+
+        for (const shell of shells)
+        {
+          await this.parseShell(geom, shell, vertices, json);
+        }
       } else if (geomType == "MultiSurface" || geomType == "CompositeSurface") {
-        boundaries = json.CityObjects[cityObj].geometry[0].boundaries;
+        var surfaces = json.CityObjects[cityObj].geometry[0].boundaries;
+
+        await this.parseShell(geom, surfaces, vertices, json);
       } else if (geomType == "MultiSolid" || geomType == "CompositeSolid") {
-        boundaries = json.CityObjects[cityObj].geometry[0].boundaries;
+        var solids = json.CityObjects[cityObj].geometry[0].boundaries;
+
+        for (const solid of solids) {
+          for (const shell of solid) {
+            await this.parseShell(geom, shell, vertices, json);
+          }
+        }
       }
+            
+      //needed for shadow
+      geom.computeFaceNormals();
       
-      var vertices = [] // List of global indices in this surface
+      //add geom to the list
+      var _id = cityObj
+      this.geoms[_id] = geom
       
+      return ("")
+    },
+    async parseShell(geom, boundaries, vertices, json)
+    {
       // Contains the boundary but with the right verticeId
       var i; // 
       var j;
@@ -368,15 +391,6 @@ export default {
           }
         }
       }
-            
-      //needed for shadow
-      geom.computeFaceNormals();
-      
-      //add geom to the list
-      var _id = cityObj
-      this.geoms[_id] = geom
-      
-      return ("")
     },
     extractLocalIndices(geom, boundary, indices, json)
     {
@@ -393,7 +407,6 @@ export default {
           new_boundary.push(vertPos)
         }
         else {
-          
           // Add vertex to geometry
           var point = new THREE.Vector3(
             json.vertices[index][0],
