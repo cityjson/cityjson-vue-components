@@ -298,29 +298,32 @@ export default {
       //create geometry and empty list for the vertices
       var geom = new THREE.Geometry()
       var vertices = [] // List of global indices in this surface
-      
-      //each geometrytype must be handled different
-      var geomType = json.CityObjects[cityObj].geometry[0].type
-      
-      var i;
-      var j;
-      if (geomType == "Solid") {
-        var shells = json.CityObjects[cityObj].geometry[0].boundaries;
 
-        for (i = 0; i < shells.length; i++)
-        {
-          await this.parseShell(geom, shells[i], vertices, json);
-        }
-      } else if (geomType == "MultiSurface" || geomType == "CompositeSurface") {
-        var surfaces = json.CityObjects[cityObj].geometry[0].boundaries;
+      for (var geom_i = 0; geom_i < json.CityObjects[cityObj].geometry.length; geom_i++)
+      {
+        //each geometrytype must be handled different
+        var geomType = json.CityObjects[cityObj].geometry[geom_i].type
+        
+        var i;
+        var j;
+        if (geomType == "Solid") {
+          var shells = json.CityObjects[cityObj].geometry[geom_i].boundaries;
 
-        await this.parseShell(geom, surfaces, vertices, json);
-      } else if (geomType == "MultiSolid" || geomType == "CompositeSolid") {
-        var solids = json.CityObjects[cityObj].geometry[0].boundaries;
+          for (i = 0; i < shells.length; i++)
+          {
+            await this.parseShell(geom, shells[i], vertices, json);
+          }
+        } else if (geomType == "MultiSurface" || geomType == "CompositeSurface") {
+          var surfaces = json.CityObjects[cityObj].geometry[geom_i].boundaries;
 
-        for (i = 0; i < solids.length; i++) {
-          for (j = 0; j < solids[i].length; j++) {
-            await this.parseShell(geom, solids[i][j], vertices, json);
+          await this.parseShell(geom, surfaces, vertices, json);
+        } else if (geomType == "MultiSolid" || geomType == "CompositeSolid") {
+          var solids = json.CityObjects[cityObj].geometry[geom_i].boundaries;
+
+          for (i = 0; i < solids.length; i++) {
+            for (j = 0; j < solids[i].length; j++) {
+              await this.parseShell(geom, solids[i][j], vertices, json);
+            }
           }
         }
       }
