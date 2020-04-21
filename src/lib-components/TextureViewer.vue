@@ -158,7 +158,7 @@ export default {
       this.raycaster.setFromCamera(this.mouse, this.camera);
 
       //calculate intersects
-      var intersects = this.raycaster.intersectObjects(this.meshes);
+      var intersects = this.raycaster.intersectObjects(this.geometries);
 
       //if clicked on nothing return
       if (intersects.length == 0) {
@@ -294,7 +294,8 @@ export default {
         await this.parseObject(cityObj, json);
       }
 
-      var bf_geo = BufferGeometryUtils.mergeBufferGeometries(
+      console.log("Let's see what we have here");
+      var bf_geo = BufferGeometryUtils.mergeBufferGeometries(//BufferGeometryUtils.mergeBufferGeometries(
         this.geometries,
         true
       );
@@ -324,7 +325,7 @@ export default {
       } else if (geomType == "MultiSurface" || geomType == "CompositeSurface") {
         boundaries = json.CityObjects[cityObj].geometry[0].boundaries;
       } else if (geomType == "MultiSolid" || geomType == "CompositeSolid") {
-        boundaries = json.CityObjects[cityObj].geometry[0].boundaries;
+        boundaries = json.CityObjects[cityObj].geometry[0].boundaries[0][0];
       }
 
       //needed for assocation of global and local vertices
@@ -372,11 +373,7 @@ export default {
           b_verticeId = b_verticeId + 1;
 
           if (img) {
-            var uv = JSON.parse(
-              JSON.stringify(
-                texture_global["vertices-texture"][textures[i][0][j + 1]]
-              )
-            );
+            var uv = texture_global["vertices-texture"][textures[i][0][j + 1]];
             b_uvs.push(new THREE.Vector2(uv[0], uv[1]));
           }
         }
