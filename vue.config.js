@@ -8,6 +8,7 @@ module.exports = {
       //baseUrl 从 Vue CLI 3.3 起已弃用，请使用publicPath
     //baseUrl: process.env.NODE_ENV === "production" ? "./" : "/",
     publicPath: process.env.NODE_ENV === "production" ? "./" : "/",
+    chainWebpack: config => config.plugins.delete('case-sensitive-paths'),
  
   // outputDir: 在npm run build 或 yarn build 时 ，生成文件的目录名称
   outputDir: "mycli3",
