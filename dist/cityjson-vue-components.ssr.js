@@ -1,4 +1,4 @@
-'use strict';Object.defineProperty(exports,'__esModule',{value:true});function _interopDefault(e){return(e&&(typeof e==='object')&&'default'in e)?e['default']:e}var $=_interopDefault(require('jquery')),_=_interopDefault(require('lodash')),THREE=require('three'),OrbitControls=_interopDefault(require('three-orbitcontrols')),earcut=_interopDefault(require('earcut'));//
+'use strict';Object.defineProperty(exports,'__esModule',{value:true});function _interopDefault(e){return(e&&(typeof e==='object')&&'default'in e)?e['default']:e}var $=_interopDefault(require('jquery')),_=_interopDefault(require('lodash')),THREE=require('three'),BufferGeometryUtils_js=require('three/examples/jsm/utils/BufferGeometryUtils.js'),OrbitControls=_interopDefault(require('three-orbitcontrols')),earcut=_interopDefault(require('earcut'));//
 //
 //
 //
@@ -822,6 +822,8 @@ var script$6 = {
     this.geoms = {};
     this.meshes = [];
     this.mesh_index = {};
+    this.materials = [];
+    this.materials_index = [];
   },
   mounted: async function mounted() {
     var this$1 = this;
@@ -1039,6 +1041,8 @@ var script$6 = {
         var coType = json.CityObjects[cityObj].type;
         var material = new THREE.MeshLambertMaterial();
         material.color.setHex(this.object_colors[coType]);
+
+        this.materials.push(material);
         
         //create mesh
         //geoms[cityObj].normalize()
@@ -1047,10 +1051,31 @@ var script$6 = {
         coMesh.name = cityObj;
         coMesh.castShadow = true;
         coMesh.receiveShadow = true;
-        this.scene.add(coMesh);
+        // this.scene.add(coMesh);
         this.meshes.push(coMesh);
         this.mesh_index[_id] = coMesh;
       }
+
+      var geoms = this.geoms;
+      var geometries = Object.keys(geoms).map(function(key){
+        return geoms[key];
+      });
+      var bf_geo = BufferGeometryUtils_js.BufferGeometryUtils.mergeBufferGeometries(
+        geometries,
+        true
+      );
+
+      for (var i$1 = 0; i$1 < bf_geo.groups.length; i$1++) {
+        bf_geo.groups[i$1].materialIndex = i$1;
+      }
+
+      var main_mesh = new THREE.Mesh(bf_geo, this.materials);
+      this.scene.add(main_mesh);
+    },
+    createMaterials: function createMaterials(){
+      var materials = [];
+
+      return materials;
     },
     //convert json file to viwer-object
     parseObject: async function parseObject(cityObj, json) {
@@ -1098,7 +1123,8 @@ var script$6 = {
       
       //add geom to the list
       var _id = cityObj;
-      this.geoms[_id] = geom;
+      var buffer_geom = new THREE.BufferGeometry().fromGeometry(geom);
+      this.geoms[_id] = buffer_geom;
       
       return ("")
     },
@@ -1281,7 +1307,7 @@ var __vue_staticRenderFns__$6 = [];
   /* scoped */
   var __vue_scope_id__$6 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$6 = "data-v-53ca2cb0";
+  var __vue_module_identifier__$6 = "data-v-c08a59c4";
   /* functional template */
   var __vue_is_functional_template__$6 = false;
   /* style inject */
@@ -1595,8 +1621,7 @@ var script$7 = {
         await this.parseObject(cityObj, json);
       }
 
-      console.log("Let's see what we have here");
-      var bf_geo = THREE.BufferGeometryUtisls.mergeBufferGeometries(//BufferGeometryUtils.mergeBufferGeometries(
+      var bf_geo = THREE.BufferGeometryUtils.mergeBufferGeometries(//BufferGeometryUtils.mergeBufferGeometries(
         this.geometries,
         true
       );
@@ -1816,7 +1841,7 @@ var __vue_staticRenderFns__$7 = [];
   /* scoped */
   var __vue_scope_id__$7 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$7 = "data-v-1c086edb";
+  var __vue_module_identifier__$7 = "data-v-4626bcab";
   /* functional template */
   var __vue_is_functional_template__$7 = false;
   /* style inject */

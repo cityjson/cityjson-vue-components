@@ -14,6 +14,12 @@ export default {
   props: {
     citymodel: Object,
     selected_objid: String,
+    material_type: {
+      type: String,
+      default: 'ObjectType' // Can be 'Textures' as well
+    },
+    textures_url: String,
+    textures_theme: String,
     object_colors: {
       type: Object,
       default: function() {
@@ -261,6 +267,8 @@ export default {
 
         this.camera_init = true;
       }
+
+      this.materials = this.createMaterials();
       
       //iterate through all cityObjects
       for (var cityObj in json.CityObjects) {
@@ -273,17 +281,10 @@ export default {
         //   continue
         // }
         
-        //set color of object
-        var coType = json.CityObjects[cityObj].type;
-        var material = new THREE.MeshLambertMaterial();
-        material.color.setHex(this.object_colors[coType]);
-
-        this.materials.push(material);
-        
         //create mesh
         //geoms[cityObj].normalize()
         var _id = cityObj
-        var coMesh = new THREE.Mesh(this.geoms[_id], material)
+        var coMesh = new THREE.Mesh(this.geoms[_id])
         coMesh.name = cityObj;
         coMesh.castShadow = true;
         coMesh.receiveShadow = true;
@@ -301,17 +302,55 @@ export default {
         true
       );
 
-      for (let i = 0; i < bf_geo.groups.length; i++) {
-        bf_geo.groups[i].materialIndex = i;
+      var i = 0;
+      for (var obj_id in json.CityObjects) {
+        bf_geo.groups[i].materialIndex = this.findMaterial(json.CityObjects[obj_id]);
+        i++;
       }
 
       var main_mesh = new THREE.Mesh(bf_geo, this.materials);
       this.scene.add(main_mesh);
     },
-    createMaterials(){
+    createMaterials(json){
       var materials = [];
 
+      if (this.material_type == 'Textures') {
+        var textures = json.appearance["textures"];
+        for (i = 0; i < textures.length; i++) {
+          materials.push(
+            new THREE.MeshBasicMaterial({
+              map: new THREE.TextureLoader().load(
+                this.textures_url + textures[i]["image"]
+              )
+            })
+          );
+        }
+
+        // material for "null"
+        materials.push(THREE.MeshLambertMaterial());
+      }
+      else {
+        let object_colors = this.object_colors;
+        materials = Object.keys(object_colors).map(function(key){
+          var material = new THREE.MeshLambertMaterial();
+
+          material.color.setHex(object_colors[key]);
+
+          return material;
+        });
+      }
+
       return materials;
+    },
+    findMaterial(cityObj){
+      if (this.material_type == 'Textures') {
+        return cityObj.texture[this.textures_theme][0][0];
+      }
+      else {
+        return Object.keys(this.object_colors).findIndex(function(color) {
+          return color == cityObj.type;
+        });
+      }
     },
     //convert json file to viwer-object
     async parseObject(cityObj, json) {
