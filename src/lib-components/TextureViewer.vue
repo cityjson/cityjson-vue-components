@@ -7,7 +7,7 @@ import $ from "jquery";
 import * as THREE from "three";
 import OrbitControls from "three-orbitcontrols";
 import earcut from "earcut";
-import { BufferGeometryUtils } from "../../BufferGeometryUtils.js";
+// import { BufferGeometryUtils } from "../../BufferGeometryUtils.js";
 
 var allmateri = [];
 var order_materi = [];
@@ -294,8 +294,7 @@ export default {
         await this.parseObject(cityObj, json);
       }
 
-      console.log("Let's see what we have here");
-      var bf_geo = BufferGeometryUtils.mergeBufferGeometries(//BufferGeometryUtils.mergeBufferGeometries(
+      var bf_geo = THREE.BufferGeometryUtils.mergeBufferGeometries(//BufferGeometryUtils.mergeBufferGeometries(
         this.geometries,
         true
       );
