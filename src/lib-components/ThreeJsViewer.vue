@@ -16,7 +16,7 @@ export default {
     selected_objid: String,
     material_type: {
       type: String,
-      default: "object-type" // Can be 'Texturesobject-type' as well
+      default: "Textures" // Can be 'object-type' as well
     },
     textures_server: {
       default: function() {
@@ -284,23 +284,25 @@ export default {
 
       //iterate through all cityObjects
       for (var cityObj in json.CityObjects) {
-        // try {
-          if (cityObj!="{10A31B7E-8FC2-45EE-836A-1DB9FEF06E04}") break;
         await this.parseObject(cityObj, json);
 
-        // } catch (e) {
-        //   console.log("ERROR at creating: " + cityObj + "\n" + e.message);
-        //   continue
-        // }
-
-        //create mesh
-        //geoms[cityObj].normalize()
         var _id = cityObj;
-        // var i = 0;
-        // for (i = 0; i < this.geoms[_id].groups.length; i++) {
-        //   this.geoms[_id].groups[i].materialIndex = this.findMaterial(json.CityObjects[obj_id]);
-        //   i++;
-        // }
+
+        if (this.material_type == "Textures") {
+          for (i = 0; i < this.geoms[_id].groups.length; i++) {
+            this.geoms[_id].groups[i].materialIndex = this.materials_index[i];
+          }
+          this.materials_index = [];
+        } else {
+          for (i = 0; i < this.geoms[_id].groups.length; i++) {
+            this.geoms[_id].groups[i].materialIndex = Object.keys(
+              this.object_colors
+            ).findIndex(function(color) {
+              return color == json.CityObjects[cityObj].type;
+            });
+          }
+        }
+
         var coMesh = new THREE.Mesh(this.geoms[_id], this.materials);
         coMesh.name = cityObj;
         coMesh.castShadow = true;
@@ -309,16 +311,6 @@ export default {
         this.meshes.push(coMesh);
         this.mesh_index[_id] = coMesh;
       }
-
-      // let geoms = this.geoms;
-      // var geometries = Object.keys(geoms).map(function(key) {
-      //   return geoms[key];
-      // });
-      // var bf_geo = BufferGeometryUtils.mergeBufferGeometries(geometries, true);
-
-      // var main_mesh = new THREE.Mesh(bf_geo, this.materials);
-
-      // this.scene.add(main_mesh);
     },
     createMaterials(json) {
       var materials = [];
@@ -350,15 +342,7 @@ export default {
 
       return materials;
     },
-    findMaterial(cityObj) {
-      if (this.material_type == "Textures") {
-        return cityObj.texture[this.textures_theme][0][0];
-      } else {
-        return Object.keys(this.object_colors).findIndex(function(color) {
-          return color == cityObj.type;
-        });
-      }
-    },
+
     //convert json file to viwer-object
     async parseObject(cityObj, json) {
       if (
@@ -371,8 +355,7 @@ export default {
       }
 
       //create geometry and empty list for the vertices
-      var geom=[]; //TODO: geom is a list which contains surfaces made of triangles
-      var vertices = []; // List of global indices in this surface
+      var geom = []; //TODO: geom is a list which contains surfaces made of triangles
       for (
         var geom_i = 0;
         geom_i < json.CityObjects[cityObj].geometry.length;
@@ -382,12 +365,14 @@ export default {
         var geomType = json.CityObjects[cityObj].geometry[geom_i].type;
 
         //TODO: in our main GUI, we need list the existing themes and highlight the default one
-        //TODO: randomly choose a theme, later on user can choose
+        var geoTexture;
 
-        var geoTexture =
-          json.CityObjects[cityObj].geometry[geom_i].texture[
-            this.textures_theme
-          ].values;
+        if (this.material_type == "Textures")
+          geoTexture =
+            json.CityObjects[cityObj].geometry[geom_i].texture[
+              this.textures_theme
+            ].values;
+        else geoTexture = null;
 
         var i;
         var j;
@@ -395,100 +380,64 @@ export default {
           var shells = json.CityObjects[cityObj].geometry[geom_i].boundaries;
 
           for (i = 0; i < shells.length; i++) {
-            await this.parseShell(
-              geom,
-              shells[i],
-              vertices,
-              json,
-              geom_i,
-              0,
-              i,
-              geoTexture[i]
-            );
+            shellTexture = geoTexture[i];
+            await this.parseShell(geom, shells[i], json, shellTexture);
           }
         } else if (
           geomType == "MultiSurface" ||
           geomType == "CompositeSurface"
         ) {
           var surfaces = json.CityObjects[cityObj].geometry[geom_i].boundaries;
-          await this.parseShell(
-            geom,
-            surfaces,
-            vertices,
-            json,
-            geom_i,
-            0,
-            0,
-            geoTexture
-          );
+          await this.parseShell(geom, surfaces, json, geoTexture);
         } else if (geomType == "MultiSolid" || geomType == "CompositeSolid") {
           var solids = json.CityObjects[cityObj].geometry[geom_i].boundaries;
 
           for (i = 0; i < solids.length; i++) {
             for (j = 0; j < solids[i].length; j++) {
-              await this.parseShell(
-                geom,
-                solids[i][j],
-                vertices,
-                json,
-                geom_i,
-                i,
-                j,
-                geoTexture[i][j]
-              );
+              shellTexture = geoTexture[i][j];
+              await this.parseShell(geom, solids[i][j], json, shellTexture);
             }
           }
         }
       }
-      var buffer_geom = BufferGeometryUtils.mergeBufferGeometries(//BufferGeometryUtils.mergeBufferGeometries(
-        geom,
-        true
-      );
+      var buffer_geom = BufferGeometryUtils.mergeBufferGeometries(geom, true);
 
-      for (i = 0; i < buffer_geom.groups.length; i++) {
-        buffer_geom.groups[i].materialIndex = this.materials_index;
-      }
-      this.materials_index=[]
       var _id = cityObj;
       this.geoms[_id] = buffer_geom;
 
       return "";
     },
-    async parseShell(
-      geom,
-      boundaries,
-      vertices,
-      json,
-      geom_i,
-      solid_i,
-      shell_i,
-      shellTexture
-    ) {
+    async parseShell(geom, boundaries, json, shellTexture) {
       // Contains the boundary but with the right verticeId
       var i; //
       var j;
       for (i = 0; i < boundaries.length; i++) {
         var polygon = new THREE.Geometry();
+        var vertices = []; // List of global indices in this surface
         var boundary = [];
         var holes = [];
         var uvs = [];
 
-        var img_source = shellTexture[i][0]; // img_source for the outer ring
-        if (img_source) this.materials_index.push(img_source[0]);
-        //assue if the outring has no url, dont consider inner rings
-        else this.materials_index.push(this.materials.length - 1);
-
         for (j = 0; j < boundaries[i].length; j++) {
+          if (shellTexture != null) {
+            var ringTexture = shellTexture[i][j]; // img_source for the outer ring
+            if (ringTexture[0]) this.materials_index.push(ringTexture[0]);
+            //assue if the outring has no url, dont consider inner rings
+            else this.materials_index.push(this.materials.length - 1);
+          } else {
+            ringTexture = [null];
+          }
+
           if (boundary.length > 0) {
             holes.push(boundary.length);
           }
+
           var new_boundary = this.extractLocalIndices(
             polygon,
             boundaries[i][j],
             vertices,
             json,
-            shellTexture[i][j],
-            img_source,
+            ringTexture,
             uvs
           );
           boundary.push(...new_boundary);
@@ -533,34 +482,23 @@ export default {
               boundary[tr[k + 2]]
             )
           );
-          if (img_source) {
+          if (ringTexture[0]) {
             polygon.faceVertexUvs[0].push([
-              uvs[tr[j]],
-              uvs[tr[j + 1]],
-              uvs[tr[j + 2]]
+              uvs[tr[k]],
+              uvs[tr[k + 1]],
+              uvs[tr[k + 2]]
             ]);
           } else {
             polygon.faceVertexUvs[0].push([]);
           }
         }
         //needed for shadow
-
-        console.log("here",polygon)
-
         polygon.computeFaceNormals();
         var bufferpoly = new THREE.BufferGeometry().fromGeometry(polygon);
         geom.push(bufferpoly);
       }
     },
-    extractLocalIndices(
-      polygon,
-      boundary,
-      indices,
-      json,
-      ringTexture,
-      img_source,
-      uvs
-    ) {
+    extractLocalIndices(polygon, boundary, indices, json, ringTexture, uvs) {
       var new_boundary = [];
 
       var j;
@@ -568,24 +506,20 @@ export default {
         //the original index from the json file
         var index = boundary[j];
 
-        //if this index is already there
-        if (indices.includes(index)) {
-          var vertPos = indices.indexOf(index);
-          new_boundary.push(vertPos);
-        } else {
-          // Add vertex to geometry
-          var point = new THREE.Vector3(
-            json.vertices[index][0],
-            json.vertices[index][1],
-            json.vertices[index][2]
-          );
-          polygon.vertices.push(point);
+        // Add vertex to geometry
+        var point = new THREE.Vector3(
+          json.vertices[index][0],
+          json.vertices[index][1],
+          json.vertices[index][2]
+        );
+        polygon.vertices.push(point);
+        new_boundary.push(indices.length);
 
-          new_boundary.push(indices.length);
-          indices.push(index);
-        }
-        if (img_source) {
+        indices.push(index);
+
+        if (ringTexture[0]) {
           var uv = json.appearance["vertices-texture"][ringTexture[j + 1]];
+
           uvs.push(new THREE.Vector2(uv[0], uv[1]));
         }
       }
