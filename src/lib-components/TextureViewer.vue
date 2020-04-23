@@ -7,7 +7,7 @@ import $ from "jquery";
 import * as THREE from "three";
 import OrbitControls from "three-orbitcontrols";
 import earcut from "earcut";
-// import { BufferGeometryUtils } from "../../BufferGeometryUtils.js";
+import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 var allmateri = [];
 var order_materi = [];
@@ -274,7 +274,7 @@ export default {
         allmateri.push(
           new THREE.MeshBasicMaterial({
             map: new THREE.TextureLoader().load(
-              "api/examples/data/" + textures[i]["image"]
+              "api/" + textures[i]["image"]
             )
           })
         );
@@ -282,11 +282,7 @@ export default {
 
       // material for "null"
       allmateri.push(
-        new THREE.MeshBasicMaterial({
-          map: new THREE.TextureLoader().load(
-            "api/examples/data/appearances/ground.jpg"
-          )
-        })
+new THREE.MeshLambertMaterial({ color: "black" })
       );
 
       //iterate through all cityObjects
@@ -294,13 +290,15 @@ export default {
         await this.parseObject(cityObj, json);
       }
 
-      var bf_geo = THREE.BufferGeometryUtils.mergeBufferGeometries(//BufferGeometryUtils.mergeBufferGeometries(
+      console.log(this.geometries);
+      var bf_geo = BufferGeometryUtils.mergeBufferGeometries(//BufferGeometryUtils.mergeBufferGeometries(
         this.geometries,
         true
       );
       for (i = 0; i < bf_geo.groups.length; i++) {
         bf_geo.groups[i].materialIndex = order_materi[i];
       }
+      console.log(bf_geo);
 
       var coMesh = new THREE.Mesh(bf_geo, allmateri);
       this.scene.add(coMesh);
@@ -350,7 +348,7 @@ export default {
         var b_verticeId = 0;
         var b_uvs = [];
 
-        var img = texture_global["textures"][textures[i][0][0]];
+        var img = textures[i][0][0];
         if (img) order_materi.push(textures[i][0][0]);
         else order_materi.push(allmateri.length - 1);
 
@@ -420,7 +418,7 @@ export default {
               b_uvs[tr[j + 2]]
             ]);
           } else {
-            b_geom.faceVertexUvs[0].push([(0, 0), (0, 1), (1, 0)]);
+            b_geom.faceVertexUvs[0].push([]);
           }
         }
         var buffergeo = new THREE.BufferGeometry().fromGeometry(b_geom);

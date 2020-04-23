@@ -21,21 +21,14 @@ module.exports = {
     open: true, 
 
     proxy: {
-      "/api": {
-        target: "http://localhost:5050",
-        ws: true,
+      '/': { // textures
+        target: "http://localhost:5050/",
         changeOrigin: true, 
+        ws:true,
         pathRewrite: {
-            '^/api': '' 
+            '^/api': '/examples/data' 
           }
-      },
-      '/foo': { 
-      target: 'https://3d.bk.tudelft.nl', 
-      changeOrigin: true, 
-      pathRewrite: { 
-          '^/foo': '' 
       }
-    }
     }
   }
 }; 
