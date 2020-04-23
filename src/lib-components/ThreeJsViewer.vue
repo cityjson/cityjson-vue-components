@@ -16,7 +16,7 @@ export default {
     selected_objid: String,
     material_type: {
       type: String,
-      default: "Textures" // Can be 'object-type' as well
+      default: "object-type" // Can be 'object-type' as well
     },
     textures_server: {
       default: function() {
@@ -26,7 +26,7 @@ export default {
     }, // server storing the texture files e.g. .jpeg
     textures_theme: {
       type: String,
-      default: "rgbTexture" // Can be 'Texturesobject-type' as well
+      default: "rgbTexture" 
     },
     object_colors: {
       type: Object,
@@ -284,9 +284,11 @@ export default {
 
       //iterate through all cityObjects
       for (var cityObj in json.CityObjects) {
+
         await this.parseObject(cityObj, json);
 
         var _id = cityObj;
+        if (this.geoms[_id].groups.length>0){
 
         if (this.material_type == "Textures") {
           for (i = 0; i < this.geoms[_id].groups.length; i++) {
@@ -294,15 +296,17 @@ export default {
           }
           this.materials_index = [];
         } else {
-          for (i = 0; i < this.geoms[_id].groups.length; i++) {
-            this.geoms[_id].groups[i].materialIndex = Object.keys(
+          let material_i=Object.keys(
               this.object_colors
             ).findIndex(function(color) {
               return color == json.CityObjects[cityObj].type;
             });
+
+          for (i = 0; i < this.geoms[_id].groups.length; i++) {
+            this.geoms[_id].groups[i].materialIndex = material_i;
           }
         }
-
+        }
         var coMesh = new THREE.Mesh(this.geoms[_id], this.materials);
         coMesh.name = cityObj;
         coMesh.castShadow = true;
@@ -355,7 +359,9 @@ export default {
       }
 
       //create geometry and empty list for the vertices
-      var geom = []; //TODO: geom is a list which contains surfaces made of triangles
+      var geom = []; //geom is a list which contains surfaces made of triangles
+      var _id = cityObj;
+
       for (
         var geom_i = 0;
         geom_i < json.CityObjects[cityObj].geometry.length;
@@ -399,11 +405,17 @@ export default {
             }
           }
         }
-      }
-      var buffer_geom = BufferGeometryUtils.mergeBufferGeometries(geom, true);
+        else if (geomType == "GeometryInstance")
+        {
+          this.geoms[_id] = new THREE.BufferGeometry();
+                     console.log(this.geoms[_id])
 
-      var _id = cityObj;
-      this.geoms[_id] = buffer_geom;
+           return ""
+        }
+      }
+
+        this.geoms[_id] = BufferGeometryUtils.mergeBufferGeometries(geom, true);
+         console.log("buffer",this.geoms[_id])
 
       return "";
     },

@@ -1,6 +1,6 @@
 <template>
   <div id="main_content">
-    <three-js-viewer :citymodel="citymodel"></three-js-viewer>
+    <three-js-viewer :citymodel="citymodel" texture_theme="rbgTexture"></three-js-viewer>
   </div>
 </template>
 
@@ -9,7 +9,7 @@ import { ThreeJsViewer } from '../src/entry'
 
 import 'bootstrap/dist/css/bootstrap.css'
 
-import test_cm from './data/Rotterdam.json';
+import test_cm from './data/geores_testdata.json';
 
 export default {
   name: 'ThreeJsExample',
