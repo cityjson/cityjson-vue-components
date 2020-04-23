@@ -9,7 +9,7 @@ import { ThreeJsViewer } from '../src/entry'
 
 import 'bootstrap/dist/css/bootstrap.css'
 
-import test_cm from './data/geores_testdata.json';
+import test_cm from './data/test.json';
 
 export default {
   name: 'ThreeJsExample',

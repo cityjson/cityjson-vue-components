@@ -372,6 +372,7 @@ export default {
 
         //TODO: in our main GUI, we need list the existing themes and highlight the default one
         var geoTexture;
+        var shellTexture;
 
         if (this.material_type == "Textures")
           geoTexture =
@@ -386,6 +387,9 @@ export default {
           var shells = json.CityObjects[cityObj].geometry[geom_i].boundaries;
 
           for (i = 0; i < shells.length; i++) {
+            if (geoTexture==null)
+            shellTexture==null
+            else
             shellTexture = geoTexture[i];
             await this.parseShell(geom, shells[i], json, shellTexture);
           }
@@ -408,14 +412,11 @@ export default {
         else if (geomType == "GeometryInstance")
         {
           this.geoms[_id] = new THREE.BufferGeometry();
-                     console.log(this.geoms[_id])
-
            return ""
         }
       }
 
         this.geoms[_id] = BufferGeometryUtils.mergeBufferGeometries(geom, true);
-         console.log("buffer",this.geoms[_id])
 
       return "";
     },
