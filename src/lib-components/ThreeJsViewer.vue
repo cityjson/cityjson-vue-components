@@ -63,7 +63,7 @@ export default {
     this.mesh_index = {};
   },
   async mounted() {
-    this.$parent.$emit('rendering', true);
+    this.$emit('rendering', true);
 
     setTimeout(async () => {
       this.initScene();
@@ -83,7 +83,7 @@ export default {
         }
       });
 
-      this.$parent.$emit('rendering', false);
+      this.$emit('rendering', false);
     }, 25);
   },
   watch: {
@@ -103,7 +103,7 @@ export default {
     },
     citymodel: {
       handler: async function(newVal, ) {
-        this.$parent.$emit('rendering', true);
+        this.$emit('rendering', true);
 
         setTimeout(async () => {
           this.clearScene();
@@ -115,7 +115,7 @@ export default {
 
           this.renderer.render(this.scene, this.camera);
     
-          this.$parent.$emit('rendering', false);
+          this.$emit('rendering', false);
         }, 25);
       },
       deep: true
@@ -150,13 +150,13 @@ export default {
 
       //if clicked on nothing return
       if (intersects.length == 0) {
-        this.$parent.$emit('object_clicked', null);
+        this.$emit('object_clicked', null);
         return
       }
 
       //get the id of the first object that intersects (equals the clicked object)
       var cityObjId = intersects[0].object.name;
-      this.$parent.$emit('object_clicked', cityObjId);
+      this.$emit('object_clicked', cityObjId);
     },
     initScene() {
       this.scene = new THREE.Scene();
