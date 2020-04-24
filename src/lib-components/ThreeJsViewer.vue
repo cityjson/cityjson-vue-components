@@ -121,7 +121,7 @@ export default {
       deep: true
     },
     selected_objid: function(newId, oldId) {
-      if (oldId != null)
+      if (oldId != null && oldId in this.citymodel.CityObjects)
       {
         var coType = this.citymodel.CityObjects[oldId].type;
         this.mesh_index[oldId].material.color.setHex(this.object_colors[coType]);
