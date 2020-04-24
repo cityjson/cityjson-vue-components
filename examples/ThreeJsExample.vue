@@ -1,6 +1,10 @@
 <template>
   <div id="main_content">
-    <three-js-viewer :citymodel="citymodel"></three-js-viewer>
+    <three-js-viewer
+      :citymodel="citymodel"
+      :selected_objid="selected_id"
+      @object_clicked="selected_id = $event">
+    </three-js-viewer>
   </div>
 </template>
 
@@ -18,7 +22,8 @@ export default {
   },
   data() {
     return {
-      citymodel: test_cm
+      citymodel: test_cm,
+      selected_id: null
     }
   }
 }
