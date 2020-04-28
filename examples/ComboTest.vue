@@ -12,12 +12,13 @@
       <div class="col-8 h-100">
         <div class="col-auto m-2 =0" style="position: absolute; z-index: 1">
           <CityObjectCard
+            :citymodel="test_cityjson_file"
             :cityobject="test_cityjson_file.CityObjects[selected_id]"
-            @input="test_cityjson_file.CityObjects[selected_id] = $event"
             :cityobject_id="selected_id"
             :expanded="0"
             :editable="true"
             v-if="selected_id != null"
+            @input="test_cityjson_file.CityObjects[selected_id] = $event"
             @close="selected_id = null"
           ></CityObjectCard>
         </div>

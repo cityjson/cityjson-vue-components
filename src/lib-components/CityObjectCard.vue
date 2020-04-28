@@ -2,6 +2,7 @@
   <div class="card mb-2" :id="cityobject_id" :class="{ 'border-primary' : selected }">
     <div class="card-body">
       <CityObjectInfo
+        :citymodel="citymodel"
         :cityobject="cityobject"
         :cityobject_id="cityobject_id"
         :editable="editable"
@@ -23,6 +24,7 @@ export default {
     CityObjectInfo
   },
   props: {
+    citymodel: Object,
     cityobject: Object,
     cityobject_id: String,
     selected: {
@@ -80,9 +82,9 @@ export default {
       this.$emit('object_clicked', this.cityobject_id);
     },
     getObject(objid) {
-      if (this.$parent.citymodel)
+      if (this.citymodel)
       {
-        return this.$parent.citymodel.CityObjects[objid];
+        return this.citymodel.CityObjects[objid];
       }
       else
       {

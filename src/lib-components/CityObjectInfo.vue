@@ -12,7 +12,7 @@
     <h5 class="card-title text-truncate">
       {{ cityobject_id }}
     </h5>
-    <div>
+    <div v-if="citymodel != null">
       <small v-show="'parents' in cityobject">
         Parents:
         <a
@@ -86,6 +86,7 @@ export default {
     ExpandableBadge
   },
   props: {
+    citymodel: Object,
     cityobject: Object,
     cityobject_id: String,
     selected: {
@@ -137,9 +138,9 @@ export default {
       return this.expanded == mode;
     },
     getObject(objid) {
-      if (this.$parent.citymodel)
+      if (this.citymodel)
       {
-        return this.$parent.citymodel.CityObjects[objid];
+        return this.citymodel.CityObjects[objid];
       }
       else
       {
