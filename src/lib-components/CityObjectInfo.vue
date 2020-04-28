@@ -4,6 +4,9 @@
       <div class="text-secondary"><small><i :class="getIconStyle(cityobject)"></i> {{ cityobject.type }}</small></div>
       <div class="col-auto p-0" v-if="editable">
         <button class="btn btn-sm" :class="[ edit_mode ? 'btn-warning' : 'btn-outline-warning' ]" @click="edit_mode = !edit_mode"><i class="fas fa-pen mr-1"></i> {{ edit_mode ? 'Close edit' : 'Edit' }}</button>
+        <button type="button" class="close ml-2" aria-label="Close" @click="$emit('close')">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
     </div>
     <h5 class="card-title text-truncate">
@@ -132,9 +135,6 @@ export default {
     },
     is_mode(mode) {
       return this.expanded == mode;
-    },
-    select_this() {
-      this.$emit('object_clicked', this.cityobject_id);
     },
     getObject(objid) {
       if (this.$parent.citymodel)

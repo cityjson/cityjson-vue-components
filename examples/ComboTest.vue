@@ -18,7 +18,7 @@
             :expanded="0"
             :editable="true"
             v-if="selected_id != null"
-            @object_clicked="selected_id = $event"
+            @close="selected_id = null"
           ></CityObjectCard>
         </div>
         <three-js-viewer
