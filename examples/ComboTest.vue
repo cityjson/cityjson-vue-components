@@ -2,17 +2,37 @@
   <div id="main_content">
     <div class="row h-100 p-0">
       <div class="col-4 h-100 overflow-auto">
-        <city-objects-tree :cityobjects="test_cityjson_file.CityObjects"></city-objects-tree>
+        <city-objects-tree
+          :citymodel="test_cityjson_file"
+          :cityobjects="test_cityjson_file.CityObjects"
+          :selected_objid="selected_id"
+          @object_clicked="selected_id = $event">
+        </city-objects-tree>
       </div>
       <div class="col-8 h-100">
-        <three-js-viewer :citymodel="test_cityjson_file"></three-js-viewer>
+        <div class="col-auto m-2 =0" style="position: absolute; z-index: 1">
+          <CityObjectCard
+            :cityobject="test_cityjson_file.CityObjects[selected_id]"
+            @input="test_cityjson_file.CityObjects[selected_id] = $event"
+            :cityobject_id="selected_id"
+            :expanded="0"
+            :editable="true"
+            v-if="selected_id != null"
+            @object_clicked="selected_id = $event"
+          ></CityObjectCard>
+        </div>
+        <three-js-viewer
+          :citymodel="test_cityjson_file"
+          :selected_objid="selected_id"
+          @object_clicked="selected_id = $event">
+        </three-js-viewer>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ThreeJsViewer, CityObjectsTree } from '../src/entry'
+import { ThreeJsViewer, CityObjectsTree, CityObjectCard } from '../src/entry'
 
 import 'bootstrap/dist/css/bootstrap.css'
 
@@ -24,7 +44,8 @@ export default {
   name: 'ThreeJsExample',
   components: {
     ThreeJsViewer,
-    CityObjectsTree
+    CityObjectsTree,
+    CityObjectCard
   },
   data() {
     return {

@@ -20,10 +20,12 @@
       <CityObjectsTreeItem
         class="item"
         v-for="child_id in item.children"
+        :citymodel="citymodel"
         :key="child_id"
         :item="getObject(child_id)"
         :cityobject_id="child_id"
         :selected_objid="selected_objid"
+        @object_clicked="$emit('object_clicked', $event)"
       ></CityObjectsTreeItem>
     </ul>
   </li>
@@ -43,16 +45,12 @@ export default {
     item: Object,
     cityobject_id: String,
     selected_objid: String,
+    citymodel: Object
   },
   data: function () {
     return {
       isOpen: false
     }
-  },
-  created() {
-    this.$on('object_clicked', (objid) => {
-      this.$parent.$emit('object_clicked', objid);
-    });
   },
   computed: {
     selected: function() {
@@ -78,7 +76,7 @@ export default {
   },
   methods: {
     select_this() {
-      this.$parent.$emit('object_clicked', this.cityobject_id);
+      this.$emit('object_clicked', this.cityobject_id);
     },
     toggle: function () {
       if (this.isFolder) {
@@ -92,7 +90,7 @@ export default {
       }
     },
     getObject(objid) {
-      return this.$parent.citymodel.CityObjects[objid];
+      return this.citymodel.CityObjects[objid];
     },
     getGeometryIcon(geom_type) {
       var geometry_icons = {

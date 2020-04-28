@@ -134,7 +134,7 @@ export default {
       return this.expanded == mode;
     },
     select_this() {
-      this.$parent.$emit('object_clicked', this.cityobject_id);
+      this.$emit('object_clicked', this.cityobject_id);
     },
     getObject(objid) {
       if (this.$parent.citymodel)

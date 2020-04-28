@@ -1,7 +1,7 @@
 <template>
   <div class="card mb-2" :id="cityobject_id" :class="{ 'border-primary' : selected }">
     <div class="card-body">
-      <CityObjectInfo :cityobject="cityobject" :cityobject_id="cityobject_id" @input="saveChanges" editable="true"></CityObjectInfo>
+      <CityObjectInfo :cityobject="cityobject" :cityobject_id="cityobject_id" @input="saveChanges" :editable="editable"></CityObjectInfo>
     </div>
   </div>
 </template>
@@ -26,6 +26,10 @@ export default {
     expanded: {
       type: Number,
       default: 0
+    },
+    editable: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
@@ -67,7 +71,7 @@ export default {
       return this.expanded == mode;
     },
     select_this() {
-      this.$parent.$emit('object_clicked', this.cityobject_id);
+      this.$emit('object_clicked', this.cityobject_id);
     },
     getObject(objid) {
       if (this.$parent.citymodel)

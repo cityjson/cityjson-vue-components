@@ -2,11 +2,13 @@
   <ul class="list-unstyled overflow-auto px-3">
     <CityObjectsTreeItem
       v-for="(cityobject, coid) in cityobjects"
+      :citymodel="citymodel"
       :item="cityobject"
       :cityobject_id="coid"
       :key="coid"
       :selected_objid="selected_objid"
       v-show="matches(coid, cityobject)"
+      @object_clicked="$emit('object_clicked', $event)"
     ></CityObjectsTreeItem>  
   </ul>
 </template>
@@ -22,6 +24,7 @@ export default {
   props: {
     cityobjects: Object,
     selected_objid: String,
+    citymodel: Object,
     matches: {
       type: Function,
       default: function() {
@@ -29,17 +32,10 @@ export default {
       }
     }
   },
-  computed: {
-    citymodel: function() {
-      return this.$parent.citymodel;
-    }
-  },
-  created() {
-    let self = this;
-
-    this.$on('object_clicked', (objid) => {
-      self.$parent.$emit('object_clicked', objid);
-    });
-  },
+  // computed: {
+  //   citymodel: function() {
+  //     return this.$parent.citymodel;
+  //   }
+  // }
 }
 </script>
