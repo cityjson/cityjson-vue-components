@@ -34,90 +34,80 @@ var script = {
       return 'text-white';
     }
   }
-};function normalizeComponent(template, style, script, scopeId, isFunctionalTemplate, moduleIdentifier
-/* server only */
-, shadowMode, createInjector, createInjectorSSR, createInjectorShadow) {
-  if (typeof shadowMode !== 'boolean') {
-    createInjectorSSR = createInjector;
-    createInjector = shadowMode;
-    shadowMode = false;
-  } // Vue.extend constructor export interop.
-
-
-  var options = typeof script === 'function' ? script.options : script; // render functions
-
-  if (template && template.render) {
-    options.render = template.render;
-    options.staticRenderFns = template.staticRenderFns;
-    options._compiled = true; // functional template
-
-    if (isFunctionalTemplate) {
-      options.functional = true;
+};function normalizeComponent(template, style, script, scopeId, isFunctionalTemplate, moduleIdentifier /* server only */, shadowMode, createInjector, createInjectorSSR, createInjectorShadow) {
+    if (typeof shadowMode !== 'boolean') {
+        createInjectorSSR = createInjector;
+        createInjector = shadowMode;
+        shadowMode = false;
     }
-  } // scopedId
-
-
-  if (scopeId) {
-    options._scopeId = scopeId;
-  }
-
-  var hook;
-
-  if (moduleIdentifier) {
-    // server build
-    hook = function hook(context) {
-      // 2.3 injection
-      context = context || // cached call
-      this.$vnode && this.$vnode.ssrContext || // stateful
-      this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext; // functional
-      // 2.2 with runInNewContext: true
-
-      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
-        context = __VUE_SSR_CONTEXT__;
-      } // inject component styles
-
-
-      if (style) {
-        style.call(this, createInjectorSSR(context));
-      } // register component module identifier for async chunk inference
-
-
-      if (context && context._registeredComponents) {
-        context._registeredComponents.add(moduleIdentifier);
-      }
-    }; // used by ssr in case component is cached and beforeCreate
-    // never gets called
-
-
-    options._ssrRegister = hook;
-  } else if (style) {
-    hook = shadowMode ? function () {
-      style.call(this, createInjectorShadow(this.$root.$options.shadowRoot));
-    } : function (context) {
-      style.call(this, createInjector(context));
-    };
-  }
-
-  if (hook) {
-    if (options.functional) {
-      // register for functional component in vue file
-      var originalRender = options.render;
-
-      options.render = function renderWithStyleInjection(h, context) {
-        hook.call(context);
-        return originalRender(h, context);
-      };
-    } else {
-      // inject component registration as beforeCreate hook
-      var existing = options.beforeCreate;
-      options.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+    // Vue.extend constructor export interop.
+    var options = typeof script === 'function' ? script.options : script;
+    // render functions
+    if (template && template.render) {
+        options.render = template.render;
+        options.staticRenderFns = template.staticRenderFns;
+        options._compiled = true;
+        // functional template
+        if (isFunctionalTemplate) {
+            options.functional = true;
+        }
     }
-  }
-
-  return script;
-}
-
-var normalizeComponent_1 = normalizeComponent;/* script */
+    // scopedId
+    if (scopeId) {
+        options._scopeId = scopeId;
+    }
+    var hook;
+    if (moduleIdentifier) {
+        // server build
+        hook = function (context) {
+            // 2.3 injection
+            context =
+                context || // cached call
+                    (this.$vnode && this.$vnode.ssrContext) || // stateful
+                    (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext); // functional
+            // 2.2 with runInNewContext: true
+            if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
+                context = __VUE_SSR_CONTEXT__;
+            }
+            // inject component styles
+            if (style) {
+                style.call(this, createInjectorSSR(context));
+            }
+            // register component module identifier for async chunk inference
+            if (context && context._registeredComponents) {
+                context._registeredComponents.add(moduleIdentifier);
+            }
+        };
+        // used by ssr in case component is cached and beforeCreate
+        // never gets called
+        options._ssrRegister = hook;
+    }
+    else if (style) {
+        hook = shadowMode
+            ? function (context) {
+                style.call(this, createInjectorShadow(context, this.$root.$options.shadowRoot));
+            }
+            : function (context) {
+                style.call(this, createInjector(context));
+            };
+    }
+    if (hook) {
+        if (options.functional) {
+            // register for functional component in vue file
+            var originalRender = options.render;
+            options.render = function renderWithStyleInjection(h, context) {
+                hook.call(context);
+                return originalRender(h, context);
+            };
+        }
+        else {
+            // inject component registration as beforeCreate hook
+            var existing = options.beforeCreate;
+            options.beforeCreate = existing ? [].concat(existing, hook) : [hook];
+        }
+    }
+    return script;
+}/* script */
 var __vue_script__ = script;
 
 /* template */
@@ -136,15 +126,19 @@ var __vue_staticRenderFns__ = [];
   
   /* style inject SSR */
   
+  /* style inject shadow dom */
+  
 
   
-  var ExpandableBadge = normalizeComponent_1(
+  var __vue_component__ = normalizeComponent(
     { render: __vue_render__, staticRenderFns: __vue_staticRenderFns__ },
     __vue_inject_styles__,
     __vue_script__,
     __vue_scope_id__,
     __vue_is_functional_template__,
     __vue_module_identifier__,
+    false,
+    undefined,
     undefined,
     undefined
   );//
@@ -152,9 +146,10 @@ var __vue_staticRenderFns__ = [];
 var script$1 = {
   name: "CityObjectInfo",
   components: {
-    ExpandableBadge: ExpandableBadge
+    ExpandableBadge: __vue_component__
   },
   props: {
+    citymodel: Object,
     cityobject: Object,
     cityobject_id: String,
     selected: {
@@ -205,13 +200,10 @@ var script$1 = {
     is_mode: function is_mode(mode) {
       return this.expanded == mode;
     },
-    select_this: function select_this() {
-      this.$parent.$emit('object_clicked', this.cityobject_id);
-    },
     getObject: function getObject(objid) {
-      if (this.$parent.citymodel)
+      if (this.citymodel)
       {
-        return this.$parent.citymodel.CityObjects[objid];
+        return this.citymodel.CityObjects[objid];
       }
       else
       {
@@ -271,7 +263,7 @@ var script$1 = {
 var __vue_script__$1 = script$1;
 
 /* template */
-var __vue_render__$1 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_vm._ssrNode("<div class=\"d-flex justify-content-between align-items-center\"><div class=\"text-secondary\"><small><i"+(_vm._ssrClass(null,_vm.getIconStyle(_vm.cityobject)))+"></i>"+_vm._ssrEscape(" "+_vm._s(_vm.cityobject.type))+"</small></div> "+((_vm.editable)?("<div class=\"col-auto p-0\"><button"+(_vm._ssrClass("btn btn-sm",[ _vm.edit_mode ? 'btn-warning' : 'btn-outline-warning' ]))+"><i class=\"fas fa-pen mr-1\"></i>"+_vm._ssrEscape(" "+_vm._s(_vm.edit_mode ? 'Close edit' : 'Edit'))+"</button></div>"):"<!---->")+"</div> <h5 class=\"card-title text-truncate\">"+_vm._ssrEscape("\n    "+_vm._s(_vm.cityobject_id)+"\n  ")+"</h5> <div><small"+(_vm._ssrStyle(null,null, { display: ('parents' in _vm.cityobject) ? '' : 'none' }))+">\n      Parents:\n      "+(_vm._ssrList((_vm.cityobject.parents),function(parent_id){return ("<a"+(_vm._ssrAttr("href",'#' + parent_id))+(_vm._ssrAttr("title",parent_id))+"><i"+(_vm._ssrClass("text-danger",_vm.getIconStyle(_vm.getObject(parent_id), false)))+"></i></a>")}))+"</small> <small"+(_vm._ssrStyle(null,null, { display: ('children' in _vm.cityobject) ? '' : 'none' }))+">\n      Children:\n      "+(_vm._ssrList((_vm.cityobject.children),function(child_id){return ("<a"+(_vm._ssrAttr("href",'#' + child_id))+(_vm._ssrAttr("title",child_id))+"><i"+(_vm._ssrClass("text-success",_vm.getIconStyle(_vm.getObject(child_id), false)))+"></i></a>")}))+"</small></div> "),_vm._ssrNode("<div class=\"d-flex mt-2\">","</div>",[(_vm.hasAttributes)?_c('expandable-badge',{attrs:{"color":"info","expanded":!_vm.edit_mode && _vm.is_mode(1)},on:{"click":function($event){return _vm.toggle_mode(1)}}},[_vm._v("\n        "+_vm._s(_vm.attributesCount)+" Attributes\n    ")]):_vm._e(),_vm._ssrNode(" "),(_vm.hasGeometries)?_c('expandable-badge',{attrs:{"color":"danger","expanded":!_vm.edit_mode && _vm.is_mode(2)},on:{"click":function($event){return _vm.toggle_mode(2)}}},[_vm._v("\n        "+_vm._s(this.cityobject.geometry.length)+" Geometries\n    ")]):_vm._e()],2),_vm._ssrNode(" <div"+(_vm._ssrStyle(null,null, { display: (_vm.expanded || _vm.edit_mode) ? '' : 'none' }))+"><hr> <table class=\"table table-striped table-borderless overflow-auto\""+(_vm._ssrStyle(null,null, { display: (_vm.edit_mode == false && _vm.is_mode(1)) ? '' : 'none' }))+"><tbody>"+(_vm._ssrList((_vm.cityobject.attributes),function(value,key){return ("<tr><th scope=\"row\" class=\"py-1\"><small class=\"font-weight-bold\">"+_vm._ssrEscape(_vm._s(key))+"</small></th> <td class=\"py-1\"><small>"+_vm._ssrEscape(_vm._s(value))+"</small></td></tr>")}))+"</tbody></table> <div"+(_vm._ssrStyle(null,null, { display: (_vm.edit_mode == false && _vm.is_mode(2)) ? '' : 'none' }))+"><ul>"+(_vm._ssrList((_vm.cityobject.geometry),function(geom,i){return ("<li>"+_vm._ssrEscape(_vm._s(geom.type))+"</li>")}))+"</ul></div> <div"+(_vm._ssrStyle(null,null, { display: (_vm.edit_mode) ? '' : 'none' }))+"><textarea id=\"json_data\" class=\"form-control\">"+_vm._ssrEscape(_vm._s(_vm.jsonString))+"</textarea> <div class=\"d-flex justify-content-end mt-2\"><button type=\"button\" class=\"btn btn-success btn-sm\"><i class=\"fas fa-save mr-1\"></i> Save</button></div></div></div>")],2)};
+var __vue_render__$1 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_vm._ssrNode("<div class=\"d-flex justify-content-between align-items-center\"><div class=\"text-secondary\"><small><i"+(_vm._ssrClass(null,_vm.getIconStyle(_vm.cityobject)))+"></i>"+_vm._ssrEscape(" "+_vm._s(_vm.cityobject.type))+"</small></div> "+((_vm.editable)?("<div class=\"col-auto p-0\"><button"+(_vm._ssrClass("btn btn-sm",[ _vm.edit_mode ? 'btn-warning' : 'btn-outline-warning' ]))+"><i class=\"fas fa-pen mr-1\"></i>"+_vm._ssrEscape(" "+_vm._s(_vm.edit_mode ? 'Close edit' : 'Edit'))+"</button> <button type=\"button\" aria-label=\"Close\" class=\"close ml-2\"><span aria-hidden=\"true\">×</span></button></div>"):"<!---->")+"</div> <h5 class=\"card-title text-truncate\">"+_vm._ssrEscape("\n    "+_vm._s(_vm.cityobject_id)+"\n  ")+"</h5> "+((_vm.citymodel != null)?("<div><small"+(_vm._ssrStyle(null,null, { display: ('parents' in _vm.cityobject) ? '' : 'none' }))+">\n      Parents:\n      "+(_vm._ssrList((_vm.cityobject.parents),function(parent_id){return ("<a"+(_vm._ssrAttr("href",'#' + parent_id))+(_vm._ssrAttr("title",parent_id))+"><i"+(_vm._ssrClass("text-danger",_vm.getIconStyle(_vm.getObject(parent_id), false)))+"></i></a>")}))+"</small> <small"+(_vm._ssrStyle(null,null, { display: ('children' in _vm.cityobject) ? '' : 'none' }))+">\n      Children:\n      "+(_vm._ssrList((_vm.cityobject.children),function(child_id){return ("<a"+(_vm._ssrAttr("href",'#' + child_id))+(_vm._ssrAttr("title",child_id))+"><i"+(_vm._ssrClass("text-success",_vm.getIconStyle(_vm.getObject(child_id), false)))+"></i></a>")}))+"</small></div>"):"<!---->")+" "),_vm._ssrNode("<div class=\"d-flex mt-2\">","</div>",[(_vm.hasAttributes)?_c('expandable-badge',{attrs:{"color":"info","expanded":!_vm.edit_mode && _vm.is_mode(1)},on:{"click":function($event){return _vm.toggle_mode(1)}}},[_vm._v("\n        "+_vm._s(_vm.attributesCount)+" Attributes\n    ")]):_vm._e(),_vm._ssrNode(" "),(_vm.hasGeometries)?_c('expandable-badge',{attrs:{"color":"danger","expanded":!_vm.edit_mode && _vm.is_mode(2)},on:{"click":function($event){return _vm.toggle_mode(2)}}},[_vm._v("\n        "+_vm._s(this.cityobject.geometry.length)+" Geometries\n    ")]):_vm._e()],2),_vm._ssrNode(" <div"+(_vm._ssrStyle(null,null, { display: (_vm.expanded || _vm.edit_mode) ? '' : 'none' }))+"><hr> <table class=\"table table-striped table-borderless overflow-auto\""+(_vm._ssrStyle(null,null, { display: (_vm.edit_mode == false && _vm.is_mode(1)) ? '' : 'none' }))+"><tbody>"+(_vm._ssrList((_vm.cityobject.attributes),function(value,key){return ("<tr><th scope=\"row\" class=\"py-1\"><small class=\"font-weight-bold\">"+_vm._ssrEscape(_vm._s(key))+"</small></th> <td class=\"py-1\"><small>"+_vm._ssrEscape(_vm._s(value))+"</small></td></tr>")}))+"</tbody></table> <div"+(_vm._ssrStyle(null,null, { display: (_vm.edit_mode == false && _vm.is_mode(2)) ? '' : 'none' }))+"><ul>"+(_vm._ssrList((_vm.cityobject.geometry),function(geom,i){return ("<li>"+_vm._ssrEscape(_vm._s(geom.type))+"</li>")}))+"</ul></div> <div"+(_vm._ssrStyle(null,null, { display: (_vm.edit_mode) ? '' : 'none' }))+"><textarea id=\"json_data\" class=\"form-control\">"+_vm._ssrEscape(_vm._s(_vm.jsonString))+"</textarea> <div class=\"d-flex justify-content-end mt-2\"><button type=\"button\" class=\"btn btn-success btn-sm\"><i class=\"fas fa-save mr-1\"></i> Save</button></div></div></div>")],2)};
 var __vue_staticRenderFns__$1 = [];
 
   /* style */
@@ -279,22 +271,26 @@ var __vue_staticRenderFns__$1 = [];
   /* scoped */
   var __vue_scope_id__$1 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$1 = "data-v-a369aeda";
+  var __vue_module_identifier__$1 = "data-v-070feb5c";
   /* functional template */
   var __vue_is_functional_template__$1 = false;
   /* style inject */
   
   /* style inject SSR */
   
+  /* style inject shadow dom */
+  
 
   
-  var CityObjectInfo = normalizeComponent_1(
+  var __vue_component__$1 = normalizeComponent(
     { render: __vue_render__$1, staticRenderFns: __vue_staticRenderFns__$1 },
     __vue_inject_styles__$1,
     __vue_script__$1,
     __vue_scope_id__$1,
     __vue_is_functional_template__$1,
     __vue_module_identifier__$1,
+    false,
+    undefined,
     undefined,
     undefined
   );//
@@ -302,9 +298,10 @@ var __vue_staticRenderFns__$1 = [];
 var script$2 = {
   name: "CityObjectCard",
   components: {
-    CityObjectInfo: CityObjectInfo
+    CityObjectInfo: __vue_component__$1
   },
   props: {
+    citymodel: Object,
     cityobject: Object,
     cityobject_id: String,
     selected: {
@@ -314,6 +311,10 @@ var script$2 = {
     expanded: {
       type: Number,
       default: 0
+    },
+    editable: {
+      type: Boolean,
+      default: true
     }
   },
   data: function data() {
@@ -355,12 +356,12 @@ var script$2 = {
       return this.expanded == mode;
     },
     select_this: function select_this() {
-      this.$parent.$emit('object_clicked', this.cityobject_id);
+      this.$emit('object_clicked', this.cityobject_id);
     },
     getObject: function getObject(objid) {
-      if (this.$parent.citymodel)
+      if (this.citymodel)
       {
-        return this.$parent.citymodel.CityObjects[objid];
+        return this.citymodel.CityObjects[objid];
       }
       else
       {
@@ -420,7 +421,7 @@ var script$2 = {
 var __vue_script__$2 = script$2;
 
 /* template */
-var __vue_render__$2 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"card mb-2",class:{ 'border-primary' : _vm.selected },attrs:{"id":_vm.cityobject_id}},[_vm._ssrNode("<div class=\"card-body\">","</div>",[_c('CityObjectInfo',{attrs:{"cityobject":_vm.cityobject,"cityobject_id":_vm.cityobject_id,"editable":"true"},on:{"input":_vm.saveChanges}})],1)])};
+var __vue_render__$2 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"card mb-2",class:{ 'border-primary' : _vm.selected },attrs:{"id":_vm.cityobject_id}},[_vm._ssrNode("<div class=\"card-body\">","</div>",[_c('CityObjectInfo',{attrs:{"citymodel":_vm.citymodel,"cityobject":_vm.cityobject,"cityobject_id":_vm.cityobject_id,"editable":_vm.editable},on:{"input":_vm.saveChanges,"close":function($event){return _vm.$emit('close')}}})],1)])};
 var __vue_staticRenderFns__$2 = [];
 
   /* style */
@@ -428,22 +429,26 @@ var __vue_staticRenderFns__$2 = [];
   /* scoped */
   var __vue_scope_id__$2 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$2 = "data-v-62a65b2c";
+  var __vue_module_identifier__$2 = "data-v-9a85881c";
   /* functional template */
   var __vue_is_functional_template__$2 = false;
   /* style inject */
   
   /* style inject SSR */
   
+  /* style inject shadow dom */
+  
 
   
-  var CityObjectCard = normalizeComponent_1(
+  var __vue_component__$2 = normalizeComponent(
     { render: __vue_render__$2, staticRenderFns: __vue_staticRenderFns__$2 },
     __vue_inject_styles__$2,
     __vue_script__$2,
     __vue_scope_id__$2,
     __vue_is_functional_template__$2,
     __vue_module_identifier__$2,
+    false,
+    undefined,
     undefined,
     undefined
   );//
@@ -491,15 +496,19 @@ var __vue_staticRenderFns__$3 = [];
   
   /* style inject SSR */
   
+  /* style inject shadow dom */
+  
 
   
-  var GeometryBadge = normalizeComponent_1(
+  var __vue_component__$3 = normalizeComponent(
     { render: __vue_render__$3, staticRenderFns: __vue_staticRenderFns__$3 },
     __vue_inject_styles__$3,
     __vue_script__$3,
     __vue_scope_id__$3,
     __vue_is_functional_template__$3,
     __vue_module_identifier__$3,
+    false,
+    undefined,
     undefined,
     undefined
   );//
@@ -507,24 +516,18 @@ var __vue_staticRenderFns__$3 = [];
 var script$4 = {
   name: 'CityObjectsTreeItem',
   components: {
-    GeometryBadge: GeometryBadge
+    GeometryBadge: __vue_component__$3
   },
   props: {
     item: Object,
     cityobject_id: String,
     selected_objid: String,
+    citymodel: Object
   },
   data: function () {
     return {
       isOpen: false
     }
-  },
-  created: function created() {
-    var this$1 = this;
-
-    this.$on('object_clicked', function (objid) {
-      this$1.$parent.$emit('object_clicked', objid);
-    });
   },
   computed: {
     selected: function() {
@@ -550,7 +553,7 @@ var script$4 = {
   },
   methods: {
     select_this: function select_this() {
-      this.$parent.$emit('object_clicked', this.cityobject_id);
+      this.$emit('object_clicked', this.cityobject_id);
     },
     toggle: function () {
       if (this.isFolder) {
@@ -564,7 +567,7 @@ var script$4 = {
       }
     },
     getObject: function getObject(objid) {
-      return this.$parent.citymodel.CityObjects[objid];
+      return this.citymodel.CityObjects[objid];
     },
     getGeometryIcon: function getGeometryIcon(geom_type) {
       var geometry_icons = {
@@ -625,95 +628,90 @@ var script$4 = {
     },
   }
 };function createInjectorSSR(context) {
-  if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
-    context = __VUE_SSR_CONTEXT__;
-  }
-
-  if (!context) { return function () {}; }
-
-  if (!('styles' in context)) {
-    context._styles = context._styles || {};
-    Object.defineProperty(context, 'styles', {
-      enumerable: true,
-      get: function get() {
-        return context._renderStyles(context._styles);
-      }
-    });
-    context._renderStyles = context._renderStyles || renderStyles;
-  }
-
-  return function (id, style) {
-    return addStyle(id, style, context);
-  };
+    if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
+        context = __VUE_SSR_CONTEXT__;
+    }
+    if (!context)
+        { return function () { }; }
+    if (!('styles' in context)) {
+        context._styles = context._styles || {};
+        Object.defineProperty(context, 'styles', {
+            enumerable: true,
+            get: function () { return context._renderStyles(context._styles); }
+        });
+        context._renderStyles = context._renderStyles || renderStyles;
+    }
+    return function (id, style) { return addStyle(id, style, context); };
 }
-
 function addStyle(id, css, context) {
-  var group =  css.media || 'default' ;
-  var style = context._styles[group] || (context._styles[group] = {
-    ids: [],
-    css: ''
-  });
-
-  if (!style.ids.includes(id)) {
-    style.media = css.media;
-    style.ids.push(id);
-    var code = css.source;
-
-    style.css += code + '\n';
-  }
+    var group =  css.media || 'default' ;
+    var style = context._styles[group] || (context._styles[group] = { ids: [], css: '' });
+    if (!style.ids.includes(id)) {
+        style.media = css.media;
+        style.ids.push(id);
+        var code = css.source;
+        style.css += code + '\n';
+    }
 }
-
 function renderStyles(styles) {
-  var css = '';
-
-  for (var key in styles) {
-    var style = styles[key];
-    css += '<style data-vue-ssr-id="' + Array.from(style.ids).join(' ') + '"' + (style.media ? ' media="' + style.media + '"' : '') + '>' + style.css + '</style>';
-  }
-
-  return css;
-}
-
-var server = createInjectorSSR;/* script */
+    var css = '';
+    for (var key in styles) {
+        var style = styles[key];
+        css +=
+            '<style data-vue-ssr-id="' +
+                Array.from(style.ids).join(' ') +
+                '"' +
+                (style.media ? ' media="' + style.media + '"' : '') +
+                '>' +
+                style.css +
+                '</style>';
+    }
+    return css;
+}/* script */
 var __vue_script__$4 = script$4;
 
 /* template */
-var __vue_render__$4 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('li',{attrs:{"id":_vm.cityobject_id}},[_vm._ssrNode("<div class=\"d-flex flex-inline align-items-center\">","</div>",[_vm._ssrNode("<div class=\"d-flex justify-content-center\" style=\"width: 20px\">"+((_vm.isFolder)?("<a href=\"#\" class=\"mr-1\"><i"+(_vm._ssrClass("fas text-dark text-decoration-none",[ _vm.isOpen ? 'fa-chevron-down' : 'fa-chevron-right' ]))+"></i></a>"):"<!---->")+"</div> <div class=\"object-icon d-flex justify-content-center\"><a href=\"#\" id=\"objicon\""+(_vm._ssrAttr("title",_vm.item.type))+"><i"+(_vm._ssrClass(null,_vm.iconType))+"></i></a></div> <a href=\"#\" class=\"text-dark text-decoration-none mr-1\"><span"+(_vm._ssrClass(null,{ 'text-primary' : _vm.selected }))+">"+_vm._ssrEscape(_vm._s(_vm.cityobject_id))+"</span></a> "),_vm._l((_vm.item.geometry),function(geom,i){return _c('geometry-badge',{key:i,attrs:{"geometry":geom}})})],2),_vm._ssrNode(" "),(_vm.isFolder)?_vm._ssrNode("<ul class=\"list-unstyled ml-4 mb-0\""+(_vm._ssrStyle(null,null, { display: (_vm.isOpen) ? '' : 'none' }))+">","</ul>",_vm._l((_vm.item.children),function(child_id){return _c('CityObjectsTreeItem',{key:child_id,staticClass:"item",attrs:{"item":_vm.getObject(child_id),"cityobject_id":child_id,"selected_objid":_vm.selected_objid}})}),1):_vm._e()],2)};
+var __vue_render__$4 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('li',{attrs:{"id":_vm.cityobject_id}},[_vm._ssrNode("<div class=\"d-flex flex-inline align-items-center\">","</div>",[_vm._ssrNode("<div class=\"d-flex justify-content-center\" style=\"width: 20px\">"+((_vm.isFolder)?("<a href=\"#\" class=\"mr-1\"><i"+(_vm._ssrClass("fas text-dark text-decoration-none",[ _vm.isOpen ? 'fa-chevron-down' : 'fa-chevron-right' ]))+"></i></a>"):"<!---->")+"</div> <div class=\"object-icon d-flex justify-content-center\"><a href=\"#\" id=\"objicon\""+(_vm._ssrAttr("title",_vm.item.type))+"><i"+(_vm._ssrClass(null,_vm.iconType))+"></i></a></div> <a href=\"#\" class=\"text-dark text-decoration-none mr-1\"><span"+(_vm._ssrClass(null,{ 'text-primary' : _vm.selected }))+">"+_vm._ssrEscape(_vm._s(_vm.cityobject_id))+"</span></a> "),_vm._l((_vm.item.geometry),function(geom,i){return _c('geometry-badge',{key:i,attrs:{"geometry":geom}})})],2),_vm._ssrNode(" "),(_vm.isFolder)?_vm._ssrNode("<ul class=\"list-unstyled ml-4 mb-0\""+(_vm._ssrStyle(null,null, { display: (_vm.isOpen) ? '' : 'none' }))+">","</ul>",_vm._l((_vm.item.children),function(child_id){return _c('CityObjectsTreeItem',{key:child_id,staticClass:"item",attrs:{"citymodel":_vm.citymodel,"item":_vm.getObject(child_id),"cityobject_id":child_id,"selected_objid":_vm.selected_objid},on:{"object_clicked":function($event){return _vm.$emit('object_clicked', $event)}}})}),1):_vm._e()],2)};
 var __vue_staticRenderFns__$4 = [];
 
   /* style */
   var __vue_inject_styles__$4 = function (inject) {
     if (!inject) { return }
-    inject("data-v-a829c0d0_0", { source: ".object-icon{width:24px}", map: undefined, media: undefined });
+    inject("data-v-fc340cd8_0", { source: ".object-icon{width:24px}", map: undefined, media: undefined });
 
   };
   /* scoped */
   var __vue_scope_id__$4 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$4 = "data-v-a829c0d0";
+  var __vue_module_identifier__$4 = "data-v-fc340cd8";
   /* functional template */
   var __vue_is_functional_template__$4 = false;
+  /* style inject shadow dom */
+  
 
   
-  var CityObjectsTreeItem = normalizeComponent_1(
+  var __vue_component__$4 = normalizeComponent(
     { render: __vue_render__$4, staticRenderFns: __vue_staticRenderFns__$4 },
     __vue_inject_styles__$4,
     __vue_script__$4,
     __vue_scope_id__$4,
     __vue_is_functional_template__$4,
     __vue_module_identifier__$4,
+    false,
     undefined,
-    server
+    createInjectorSSR,
+    undefined
   );//
 
 var script$5 = {
   name: 'CityObjectsTree',
   components: {
-    CityObjectsTreeItem: CityObjectsTreeItem
+    CityObjectsTreeItem: __vue_component__$4
   },
   props: {
     cityobjects: Object,
     selected_objid: String,
+    citymodel: Object,
     matches: {
       type: Function,
       default: function() {
@@ -721,23 +719,16 @@ var script$5 = {
       }
     }
   },
-  computed: {
-    citymodel: function() {
-      return this.$parent.citymodel;
-    }
-  },
-  created: function created() {
-    var self = this;
-
-    this.$on('object_clicked', function (objid) {
-      self.$parent.$emit('object_clicked', objid);
-    });
-  },
+  // computed: {
+  //   citymodel: function() {
+  //     return this.$parent.citymodel;
+  //   }
+  // }
 };/* script */
 var __vue_script__$5 = script$5;
 
 /* template */
-var __vue_render__$5 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('ul',{staticClass:"list-unstyled overflow-auto px-3"},_vm._l((_vm.cityobjects),function(cityobject,coid){return _c('CityObjectsTreeItem',{directives:[{name:"show",rawName:"v-show",value:(_vm.matches(coid, cityobject)),expression:"matches(coid, cityobject)"}],key:coid,attrs:{"item":cityobject,"cityobject_id":coid,"selected_objid":_vm.selected_objid}})}),1)};
+var __vue_render__$5 = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('ul',{staticClass:"list-unstyled overflow-auto px-3"},_vm._l((_vm.cityobjects),function(cityobject,coid){return _c('CityObjectsTreeItem',{directives:[{name:"show",rawName:"v-show",value:(_vm.matches(coid, cityobject)),expression:"matches(coid, cityobject)"}],key:coid,attrs:{"citymodel":_vm.citymodel,"item":cityobject,"cityobject_id":coid,"selected_objid":_vm.selected_objid},on:{"object_clicked":function($event){return _vm.$emit('object_clicked', $event)}}})}),1)};
 var __vue_staticRenderFns__$5 = [];
 
   /* style */
@@ -745,22 +736,26 @@ var __vue_staticRenderFns__$5 = [];
   /* scoped */
   var __vue_scope_id__$5 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$5 = "data-v-70bfde4d";
+  var __vue_module_identifier__$5 = "data-v-7ac5e20c";
   /* functional template */
   var __vue_is_functional_template__$5 = false;
   /* style inject */
   
   /* style inject SSR */
   
+  /* style inject shadow dom */
+  
 
   
-  var CityObjectsTree = normalizeComponent_1(
+  var __vue_component__$5 = normalizeComponent(
     { render: __vue_render__$5, staticRenderFns: __vue_staticRenderFns__$5 },
     __vue_inject_styles__$5,
     __vue_script__$5,
     __vue_scope_id__$5,
     __vue_is_functional_template__$5,
     __vue_module_identifier__$5,
+    false,
+    undefined,
     undefined,
     undefined
   );//
@@ -822,7 +817,7 @@ var script$6 = {
   mounted: async function mounted() {
     var this$1 = this;
 
-    this.$parent.$emit('rendering', true);
+    this.$emit('rendering', true);
 
     setTimeout(async function () {
       this$1.initScene();
@@ -842,7 +837,7 @@ var script$6 = {
         }
       });
 
-      this$1.$parent.$emit('rendering', false);
+      this$1.$emit('rendering', false);
     }, 25);
   },
   watch: {
@@ -864,7 +859,7 @@ var script$6 = {
       handler: async function(newVal ) {
         var this$1 = this;
 
-        this.$parent.$emit('rendering', true);
+        this.$emit('rendering', true);
 
         setTimeout(async function () {
           this$1.clearScene();
@@ -876,13 +871,13 @@ var script$6 = {
 
           this$1.renderer.render(this$1.scene, this$1.camera);
     
-          this$1.$parent.$emit('rendering', false);
+          this$1.$emit('rendering', false);
         }, 25);
       },
       deep: true
     },
     selected_objid: function(newId, oldId) {
-      if (oldId != null)
+      if (oldId != null && oldId in this.citymodel.CityObjects)
       {
         var coType = this.citymodel.CityObjects[oldId].type;
         this.mesh_index[oldId].material.color.setHex(this.object_colors[coType]);
@@ -911,13 +906,13 @@ var script$6 = {
 
       //if clicked on nothing return
       if (intersects.length == 0) {
-        this.$parent.$emit('object_clicked', null);
+        this.$emit('object_clicked', null);
         return
       }
 
       //get the id of the first object that intersects (equals the clicked object)
       var cityObjId = intersects[0].object.name;
-      this.$parent.$emit('object_clicked', cityObjId);
+      this.$emit('object_clicked', cityObjId);
     },
     initScene: function initScene() {
       this.scene = new THREE.Scene();
@@ -1277,25 +1272,29 @@ var __vue_staticRenderFns__$6 = [];
   /* scoped */
   var __vue_scope_id__$6 = undefined;
   /* module identifier */
-  var __vue_module_identifier__$6 = "data-v-53ca2cb0";
+  var __vue_module_identifier__$6 = "data-v-cc11e9d8";
   /* functional template */
   var __vue_is_functional_template__$6 = false;
   /* style inject */
   
   /* style inject SSR */
   
+  /* style inject shadow dom */
+  
 
   
-  var ThreeJsViewer = normalizeComponent_1(
+  var __vue_component__$6 = normalizeComponent(
     { render: __vue_render__$6, staticRenderFns: __vue_staticRenderFns__$6 },
     __vue_inject_styles__$6,
     __vue_script__$6,
     __vue_scope_id__$6,
     __vue_is_functional_template__$6,
     __vue_module_identifier__$6,
+    false,
+    undefined,
     undefined,
     undefined
-  );/* eslint-disable import/prefer-default-export */var components=/*#__PURE__*/Object.freeze({__proto__:null,CityObjectCard: CityObjectCard,CityObjectInfo: CityObjectInfo,CityObjectsTree: CityObjectsTree,CityObjectsTreeItem: CityObjectsTreeItem,ThreeJsViewer: ThreeJsViewer});// Import vue components
+  );/* eslint-disable import/prefer-default-export */var components=/*#__PURE__*/Object.freeze({__proto__:null,CityObjectCard: __vue_component__$2,CityObjectInfo: __vue_component__$1,CityObjectsTree: __vue_component__$5,CityObjectsTreeItem: __vue_component__$4,ThreeJsViewer: __vue_component__$6});// Import vue components
 
 // install function executed by Vue.use()
 function install(Vue) {
@@ -1321,4 +1320,4 @@ if (typeof window !== 'undefined') {
 }
 if (GlobalVue) {
   GlobalVue.use(CityJSONComponents);
-}exports.CityObjectCard=CityObjectCard;exports.CityObjectInfo=CityObjectInfo;exports.CityObjectsTree=CityObjectsTree;exports.CityObjectsTreeItem=CityObjectsTreeItem;exports.ThreeJsViewer=ThreeJsViewer;exports.default=CityJSONComponents;
+}exports.CityObjectCard=__vue_component__$2;exports.CityObjectInfo=__vue_component__$1;exports.CityObjectsTree=__vue_component__$5;exports.CityObjectsTreeItem=__vue_component__$4;exports.ThreeJsViewer=__vue_component__$6;exports.default=CityJSONComponents;
