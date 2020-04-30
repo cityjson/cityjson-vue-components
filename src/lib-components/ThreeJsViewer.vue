@@ -495,14 +495,18 @@ export default {
               boundary[tr[k + 2]]
             )
           );
-          if (ringTexture[0]) {
+          if (ringTexture[0] && this.material_type=="Textures") {
             polygon.faceVertexUvs[0].push([
               uvs[tr[k]],
               uvs[tr[k + 1]],
               uvs[tr[k + 2]]
             ]);
           } else {
-            polygon.faceVertexUvs[0].push([]);
+            polygon.faceVertexUvs[0].push([
+              new THREE.Vector2(0,1),
+              new THREE.Vector2(1,1),
+              new THREE.Vector2(1,0),
+            ]);
           }
         }
         //needed for shadow
