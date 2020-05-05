@@ -8,6 +8,7 @@ import * as THREE from "three";
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import OrbitControls from "three-orbitcontrols";
 import earcut from "earcut";
+import { Matrix4, Vector3 } from 'three';
 
 export default {
   name: "ThreeJsViewer",
@@ -78,11 +79,22 @@ export default {
     this.mesh_index = {};
     this.materials = [];
     this.materials_index = [];
+    this.mainMatrix = new Matrix4();
 
     this.template_geoms = [];
   },
+
   async mounted() {
     this.$parent.$emit("rendering", true);
+    // var texture_themes = [];
+    // // QUESTION: can I only use one obj???
+    // for (var cityObj in this.citymodel.CityObjects) {
+    //   texture_themes = Object.keys(
+    //     this.citymodel.CityObjects[cityObj].geometry[0].texture
+    //   );
+    //   break;
+    // }
+    // this.$emit("func", texture_themes);
 
     setTimeout(async () => {
       this.initScene();
@@ -155,6 +167,16 @@ export default {
     }
   },
   methods: {
+    // getTextureThemes(json){
+    //         var texture_themes=[]
+    //         // QUESTION: can I only use one obj???
+    //          for (var cityObj in json.CityObjects) {
+    //            texture_themes=Object.keys(json.CityObjects[cityObj].geometry[0].texture);\
+    //            break
+    //          }
+    //          this.$emit('func',texture_themes)
+    //          console.log(texture_themes)
+    //      },
     handleClick() {
       var rect = this.renderer.domElement.getBoundingClientRect();
       //get mouseposition
@@ -257,20 +279,34 @@ export default {
         normGeom.vertices.push(point);
       }
 
-      for (
-        i = 0;
-        i < json["geometry-templates"]["vertices-templates"].length;
-        i++
-      ) {
-        point = new THREE.Vector3(
-          json["geometry-templates"]["vertices-templates"][i][0],
-          json["geometry-templates"]["vertices-templates"][i][1],
-          json["geometry-templates"]["vertices-templates"][i][2]
-        );
-        normGeom.vertices.push(point);
-      }
+      // for (
+      //   i = 0;
+      //   i < json["geometry-templates"]["vertices-templates"].length;
+      //   i++
+      // ) {
+      //   point = new THREE.Vector3(
+      //     json["geometry-templates"]["vertices-templates"][i][0],
+      //     json["geometry-templates"]["vertices-templates"][i][1],
+      //     json["geometry-templates"]["vertices-templates"][i][2]
+      //   );
+      //   normGeom.vertices.push(point);
+      // }
 
-      normGeom.normalize();
+      normGeom.computeBoundingSphere();
+      var sphere = normGeom.boundingSphere;
+      var center = sphere.center;
+      var radius = sphere.radius;
+
+      var s = radius === 0 ? 1 : 1.0 / radius;
+
+      this.mainMatrix.set(
+        s, 0, 0, - s * center.x,
+        0, s, 0, - s * center.y,
+        0, 0, s, - s * center.z,
+        0, 0, 0, 1
+      );
+
+      normGeom.applyMatrix4(this.mainMatrix);
 
       for (i = 0; i < json.vertices.length; i++) {
         json.vertices[i][0] = normGeom.vertices[i].x;
@@ -278,20 +314,20 @@ export default {
         json.vertices[i][2] = normGeom.vertices[i].z;
       }
 
-      for (
-        var j = 0;
-        j < json["geometry-templates"]["vertices-templates"].length-1;
-        j++
-      ) {
-        json["geometry-templates"]["vertices-templates"][j][0] =
-          normGeom.vertices[j + i+1].x;
-        json["geometry-templates"]["vertices-templates"][j][1] =
-          normGeom.vertices[j + i+1].y;
-        json["geometry-templates"]["vertices-templates"][j][2] =
-          normGeom.vertices[j + i+1].z;
-      }
+      // for (
+      //   var j = 0;
+      //   j < json["geometry-templates"]["vertices-templates"].length-1;
+      //   j++
+      // ) {
+      //   json["geometry-templates"]["vertices-templates"][j][0] =
+      //     normGeom.vertices[j + i+1].x;
+      //   json["geometry-templates"]["vertices-templates"][j][1] =
+      //     normGeom.vertices[j + i+1].y;
+      //   json["geometry-templates"]["vertices-templates"][j][2] =
+      //     normGeom.vertices[j + i+1].z;
+      // }
 
-      var stats = this.getStats(normGeom.vertices);
+      var stats = this.getStats(json.vertices);
       var avgX = stats[3];
       var avgY = stats[4];
       var avgZ = stats[5];
@@ -313,7 +349,6 @@ export default {
 
       //iterate through all cityObjects
       for (var cityObj in json.CityObjects) {
-       
         await this.parseObject(cityObj, json);
 
         var _id = cityObj;
@@ -330,7 +365,7 @@ export default {
               return color == json.CityObjects[cityObj].type;
             });
 
-            for (i = 0; i < this.geoms[_id].groups.length; i++) {
+            for (var i = 0; i < this.geoms[_id].groups.length; i++) {
               this.geoms[_id].groups[i].materialIndex = material_i;
             }
           }
@@ -513,6 +548,11 @@ export default {
           var instance = this.template_geoms[geoTemplate].clone();
           // instance.translate(referencePoint);
           instance.applyMatrix4(m);
+          var s = new Vector3();
+          s.setFromMatrixScale(this.mainMatrix);
+          instance.scale(s);
+          console.log(referencePoint);
+          console.log(s);
           instance.translate(...referencePoint);
           geom.push(instance);
         }

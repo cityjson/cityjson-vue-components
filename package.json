@@ -36,6 +36,7 @@
     "json-parse-better-errors": "^1.0.2",
     "lodash": "^4.17.15",
     "popper": "^1.0.1",
+    "popper.js": "^1.16.1",
     "three": "^0.113.2",
     "three-buffer-geometry-utils": "^1.0.0",
     "three-orbitcontrols": "^2.110.3",
