@@ -34,7 +34,7 @@ import "bootstrap/dist/js/bootstrap.min.js";
 import $ from "jquery";
 
 
-import test_cm from "./data/geores_testdata.json";
+import test_cm from "./data/LoD3_Railway_uncompressed.json";
 
 export default {
   name: "ThreeJsExample",
