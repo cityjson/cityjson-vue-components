@@ -71,7 +71,3 @@ https://pypi.org/project/cjio/
 ### How to run things locally
 https://threejs.org/docs/#manual/en/introduction/How-to-run-things-locally 
 
-
-### Questions:
-textures for a 2D surface for out ring [img_index,uv_i....]
-Then for the inner ring [img_index,uv_i....]  ???

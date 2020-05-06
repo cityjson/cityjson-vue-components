@@ -7,7 +7,7 @@ import $ from "jquery";
 import * as THREE from "three";
 import OrbitControls from "three-orbitcontrols";
 import earcut from "earcut";
-import { Matrix4, Vector3 } from 'three';
+import { Matrix4, Vector3 } from "three";
 
 export default {
   name: "ThreeJsViewer",
@@ -81,7 +81,7 @@ export default {
     this.mainMatrix = new Matrix4();
 
     this.template_geoms = [];
-    this.poly_index=[]
+    this.poly_index = [];
   },
 
   async mounted() {
@@ -277,10 +277,22 @@ export default {
       var s = radius === 0 ? 1 : 1.0 / radius;
 
       this.mainMatrix.set(
-        s, 0, 0, - s * center.x,
-        0, s, 0, - s * center.y,
-        0, 0, s, - s * center.z,
-        0, 0, 0, 1
+        s,
+        0,
+        0,
+        -s * center.x,
+        0,
+        s,
+        0,
+        -s * center.y,
+        0,
+        0,
+        s,
+        -s * center.z,
+        0,
+        0,
+        0,
+        1
       );
 
       normGeom.applyMatrix4(this.mainMatrix);
@@ -309,8 +321,9 @@ export default {
       }
 
       this.materials = this.createMaterials(json);
-      await this.parseTemplateGeom(json);
-
+      if ("geometry-templates" in json) {
+        await this.parseTemplateGeom(json);
+      }
 
       //iterate through all cityObjects
       var count = 0;
@@ -321,16 +334,18 @@ export default {
         var _id = cityObj;
         if (_id in this.geoms && this.geoms[_id].groups.length > 0) {
           if (this.material_type == "Textures") {
-
-           this.geoms[_id].clearGroups();
+            this.geoms[_id].clearGroups();
 
             for (i = 0; i < this.poly_index.length; i++) {
-              this.geoms[_id].addGroup( this.poly_index[i]*3, (this.poly_index[i+1]-this.poly_index[i])*3, this.materials_index[i] )
+              this.geoms[_id].addGroup(
+                this.poly_index[i] * 3,
+                (this.poly_index[i + 1] - this.poly_index[i]) * 3,
+                this.materials_index[i]
+              );
             }
 
             this.materials_index = [];
             this.poly_index = [];
-
           } else {
             let material_i = Object.keys(this.object_colors).findIndex(function(
               color
@@ -359,11 +374,14 @@ export default {
       if (this.material_type == "Textures") {
         var textures = json.appearance["textures"];
         for (let i = 0; i < textures.length; i++) {
+          var texture = new THREE.TextureLoader().load(
+            this.textures_server + textures[i]["image"]
+          );
+          texture.magFilter = THREE.NearestFilter;
+          texture.minFilter = THREE.NearestFilter;
           materials.push(
             new THREE.MeshLambertMaterial({
-              map: new THREE.TextureLoader().load(
-                this.textures_server + textures[i]["image"]
-              )
+              map: texture
             })
           );
         }
@@ -383,7 +401,7 @@ export default {
 
       return materials;
     },
-        async parseTemplateGeom(json) {
+    async parseTemplateGeom(json) {
       //create geometry and empty list for the vertices
 
       for (
@@ -392,7 +410,7 @@ export default {
         geom_i++
       ) {
         var geom = new THREE.Geometry();
-      var vertices = []; // List of global indices in this surface
+        var vertices = []; // List of global indices in this surface
 
         //each geometrytype must be handled different
         var geomType = json["geometry-templates"]["templates"][geom_i].type;
@@ -416,7 +434,14 @@ export default {
           for (i = 0; i < shells.length; i++) {
             if (geoTexture == null) shellTexture == null;
             else shellTexture = geoTexture[i];
-            await this.parseShell(geom, shells[i],vertices, json, shellTexture, true);
+            await this.parseShell(
+              geom,
+              shells[i],
+              vertices,
+              json,
+              shellTexture,
+              true
+            );
           }
         } else if (
           geomType == "MultiSurface" ||
@@ -424,7 +449,14 @@ export default {
         ) {
           var surfaces =
             json["geometry-templates"]["templates"][geom_i].boundaries;
-          await this.parseShell(geom, surfaces,vertices, json, geoTexture, true);
+          await this.parseShell(
+            geom,
+            surfaces,
+            vertices,
+            json,
+            geoTexture,
+            true
+          );
         } else if (geomType == "MultiSolid" || geomType == "CompositeSolid") {
           var solids =
             json["geometry-templates"]["templates"][geom_i].boundaries;
@@ -434,7 +466,8 @@ export default {
               shellTexture = geoTexture[i][j];
               await this.parseShell(
                 geom,
-                solids[i][j],vertices,
+                solids[i][j],
+                vertices,
                 json,
                 shellTexture,
                 true
@@ -538,42 +571,29 @@ export default {
           instance.scale(s.x, s.y, s.z);
           instance.translate(...referencePoint);
 
-          var vertice_num=geom.vertices.length
-          for (var i=0;i<instance.vertices.length;i++)
-          {
-          geom.vertices.push(instance.vertices[i]);            
+
+
+          var vertice_num = geom.vertices.length;
+          for (var i = 0; i < instance.vertices.length; i++) {
+            geom.vertices.push(instance.vertices[i]);
           }
+          console.log(instance);
+          for (var j = 0; j < instance.faces.length; j++) {
+            geom.faces.push(instance.faces[j]);
 
-          for (var j=0;j<instance.faces.length;j++)
-          {
-          geom.faces.push(
-            new THREE.Face3(
-              instance.faces[j].a+vertice_num,
-              instance.faces[j].b+vertice_num,
-              instance.faces[j].c+vertice_num,
-            )
-          );
-
-          //TODO: 
-          geom.faceVertexUvs[0].push([
-              new THREE.Vector2(0, 1),
-              new THREE.Vector2(1, 1),
-              new THREE.Vector2(1, 0)
-            ]);
-
+            //TODO:
+            geom.faceVertexUvs[0].push(instance.faceVertexUvs[0][j]);
           }
         }
       }
 
       //needed for shadow
       geom.computeFaceNormals();
-      this.poly_index.push(geom.faces.length)
+      this.poly_index.push(geom.faces.length);
       //add geom to the list
       var _id = cityObj;
       var buffergeom = new THREE.BufferGeometry().fromGeometry(geom);
       this.geoms[_id] = buffergeom;
-
-
 
       return "";
     },
@@ -589,7 +609,7 @@ export default {
       var i; //
       var j;
       for (i = 0; i < boundaries.length; i++) {
-          this.poly_index.push(geom.faces.length);
+        this.poly_index.push(geom.faces.length);
         var boundary = [];
         var holes = [];
         var uvs = [];
@@ -619,15 +639,21 @@ export default {
           boundary.push(...new_boundary);
         }
 
-
         //create list of points
         var pList = [];
-        var k;
-        for (k = 0; k < boundary.length; k++) {
+        var vertices_coordinates;
+
+        if (isTemplateGeom) {
+          vertices_coordinates =
+            json["geometry-templates"]["vertices-templates"];
+        } else {
+          vertices_coordinates = json.vertices;
+        }
+        for (var k = 0; k < boundary.length; k++) {
           pList.push({
-            x: json.vertices[vertices[boundary[k]]][0],
-            y: json.vertices[vertices[boundary[k]]][1],
-            z: json.vertices[vertices[boundary[k]]][2]
+            x: vertices_coordinates[vertices[boundary[k]]][0],
+            y: vertices_coordinates[vertices[boundary[k]]][1],
+            z: vertices_coordinates[vertices[boundary[k]]][2]
           });
         }
 
@@ -650,10 +676,6 @@ export default {
 
           continue;
         }
-        //         console.log(i)
-
-        // console.log(pList)
-        // console.log(uvs)
 
         //create faces based on triangulation
         for (k = 0; k < tr.length; k += 3) {
@@ -702,21 +724,28 @@ export default {
           new_boundary.push(vertPos);
         } else {
           // Add vertex to geometry
-          var point = new THREE.Vector3(
-            json.vertices[index][0],
-            json.vertices[index][1],
-            json.vertices[index][2]
-          );
+        var vertices_coordinates;
+        if (isTemplateGeom) {
+          vertices_coordinates =
+            json["geometry-templates"]["vertices-templates"];
+        } else {
+          vertices_coordinates = json.vertices;
+        }
+        // Add vertex to geometry
+        var point = new THREE.Vector3(
+          vertices_coordinates[index][0],
+          vertices_coordinates[index][1],
+          vertices_coordinates[index][2]);
           geom.vertices.push(point);
 
           new_boundary.push(indices.length);
           indices.push(index);
         }
         if (ringTexture[0]) {
-            var uv = json.appearance["vertices-texture"][ringTexture[j + 1]];
+          var uv = json.appearance["vertices-texture"][ringTexture[j + 1]];
 
-            uvs.push(new THREE.Vector2(uv[0], uv[1]));
-          }
+          uvs.push(new THREE.Vector2(uv[0], uv[1]));
+        }
       }
 
       return new_boundary;
