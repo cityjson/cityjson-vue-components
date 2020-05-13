@@ -372,6 +372,8 @@ export default {
         }
       }
 
+      var _tmp=this.material_type
+      this.material_type="Textures"
       //store all the uv_coordinates and materials_index for each theme
       for (var theme in this.textureThemes_uvs) {
         var _obj_uvs = {};
@@ -387,6 +389,7 @@ export default {
         this.textureThemes_uvs[theme] = _obj_uvs;
         this.textureThemes_materials_index[theme] = _obj_mater_index;
       }
+      this.material_type=_tmp
     },
     loadCityObjects(json) {
       this.createMaterials(json);
