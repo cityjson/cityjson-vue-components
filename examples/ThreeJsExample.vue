@@ -22,20 +22,16 @@
         </div>
       </div>
     </div>
-    <three-js-viewer @func="getTextureThemes" :citymodel="citymodel" texture_theme="rbgTexture"></three-js-viewer>
+    <three-js-viewer @getTextureThemes="getTextureThemes" :citymodel="citymodel" :texture_theme="texture_theme" :material_type="material_type"></three-js-viewer>
   </div>
 </template>
 
 <script>
 import { ThreeJsViewer } from "../src/entry";
-
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.min.js";
 import $ from "jquery";
-
-
 import test_cm from "./data/LoD3_Railway_uncompressed.json";
-
 export default {
   name: "ThreeJsExample",
   components: {
@@ -44,6 +40,8 @@ export default {
   data() {
     return {
       citymodel: test_cm,
+      texture_theme:"",
+      material_type:"Textures"
     };
   },
   methods: {
@@ -51,7 +49,7 @@ export default {
       console.log(texture_themes)
        for (var i=0;i<texture_themes.length;i++) {
       $("#themes").append("<a class='dropdown-item'>"+texture_themes[i]+"</a>");
-        console.log(texture_themes[i]);
+        this.texture_theme=texture_themes[i]; //set the default theme~
        }
     }
   }
@@ -66,13 +64,11 @@ html {
   padding: 0px;
   overflow-y: hidden; /*important as otherwise size is somehow scrollable which is not desired */
 }
-
 body {
   margin: 0px;
   padding: 0px;
   height: 100%;
 }
-
 #main_content {
   height: 100%;
   width: 100%;
