@@ -14,9 +14,10 @@ export default {
   props: {
     citymodel: Object,
     selected_objid: String,
+    texture_theme: String,
     material_type: {
       type: String,
-      default: "object-type" // Can be 'object-type' as well
+      default: "Textures" // Can be 'object-type' as well
     },
     textures_server: {
       default: function() {
@@ -24,10 +25,7 @@ export default {
         return "api/"; // temporarily create a server using http-server package  (also see vue.config.js)
       }
     }, // server storing the texture files e.g. .jpeg
-    textures_theme: {
-      type: String,
-      default: "rgbTexture"
-    },
+
     object_colors: {
       type: Object,
       default: function() {
@@ -81,20 +79,15 @@ export default {
     this.mainMatrix = new Matrix4();
 
     this.template_geoms = [];
+    this.template_geoms_poly_index = []; //for each template gemetry, store the poly_index
     this.poly_index = [];
   },
 
   async mounted() {
     this.$parent.$emit("rendering", true);
-    // var texture_themes = [];
-    // // QUESTION: can I only use one obj???
-    // for (var cityObj in this.citymodel.CityObjects) {
-    //   texture_themes = Object.keys(
-    //     this.citymodel.CityObjects[cityObj].geometry[0].texture
-    //   );
-    //   break;
-    // }
-    // this.$emit("func", texture_themes);
+    // get all the exsiting texture theme
+    this.getTextureThemes(this.citymodel);
+
 
     setTimeout(async () => {
       this.initScene();
@@ -167,6 +160,30 @@ export default {
     }
   },
   methods: {
+    getTextureThemes(json) {
+      var texture_themes = [];
+      // QUESTION: can I only use one obj???
+      for (var cityObj in this.citymodel.CityObjects) {
+        for (
+          var geom_i = 0;
+          geom_i < json.CityObjects[cityObj].geometry.length;
+          geom_i++
+        ) {
+          if (
+            "texture" in this.citymodel.CityObjects[cityObj].geometry[geom_i]
+          ) {
+            let _themes = Object.keys(
+              this.citymodel.CityObjects[cityObj].geometry[geom_i].texture
+            );
+            texture_themes = texture_themes.concat(_themes);
+          }
+        }
+      }
+
+      var uniqueTextureThemes = [...new Set(texture_themes)];
+
+      this.$emit("getTextureThemes", uniqueTextureThemes);
+    },
     handleClick() {
       var rect = this.renderer.domElement.getBoundingClientRect();
       //get mouseposition
@@ -320,27 +337,28 @@ export default {
         this.camera_init = true;
       }
 
-      this.materials = this.createMaterials(json);
+      this.createMaterials(json);
       if ("geometry-templates" in json) {
         await this.parseTemplateGeom(json);
       }
 
       //iterate through all cityObjects
-      var count = 0;
       for (var cityObj in json.CityObjects) {
-        // count++;
-        // if (count == 2) break;
         await this.parseObject(cityObj, json);
         var _id = cityObj;
-        if (_id in this.geoms && this.geoms[_id].groups.length > 0) {
+        var geoMaterials;
+        if (_id in this.geoms) {
           if (this.material_type == "Textures") {
+            var uniqueIndex = [...new Set(this.materials_index)];
+            geoMaterials = uniqueIndex.map(x => this.materials[x]);
+
             this.geoms[_id].clearGroups();
 
-            for (i = 0; i < this.poly_index.length; i++) {
+            for (i = 0; i < this.poly_index.length - 1; i++) {
               this.geoms[_id].addGroup(
                 this.poly_index[i] * 3,
                 (this.poly_index[i + 1] - this.poly_index[i]) * 3,
-                this.materials_index[i]
+                uniqueIndex.indexOf(this.materials_index[i])
               );
             }
 
@@ -353,13 +371,13 @@ export default {
               return color == json.CityObjects[cityObj].type;
             });
 
-            for (var i = 0; i < this.geoms[_id].groups.length; i++) {
-              this.geoms[_id].groups[i].materialIndex = material_i;
-            }
+            this.geoms[_id].groups[0].materialIndex = 0;
+            geoMaterials = this.materials[material_i];
           }
         }
 
-        var coMesh = new THREE.Mesh(this.geoms[_id], this.materials);
+        var coMesh = new THREE.Mesh(this.geoms[_id]);
+        coMesh.material = geoMaterials;
         coMesh.name = cityObj;
         coMesh.castShadow = true;
         coMesh.receiveShadow = true;
@@ -399,7 +417,7 @@ export default {
         });
       }
 
-      return materials;
+      this.materials = materials;
     },
     async parseTemplateGeom(json) {
       //create geometry and empty list for the vertices
@@ -421,7 +439,7 @@ export default {
         if (this.material_type == "Textures")
           geoTexture =
             json["geometry-templates"]["templates"][geom_i].texture[
-              this.textures_theme
+              this.texture_theme
             ].values;
         else geoTexture = null;
 
@@ -476,6 +494,8 @@ export default {
           }
         }
 
+        this.template_geoms_poly_index.push(this.poly_index);
+        this.poly_index = [];
         this.template_geoms.push(geom);
       }
 
@@ -507,13 +527,14 @@ export default {
         //TODO: in our main GUI, we need list the existing themes and highlight the default one
         var geoTexture;
         var shellTexture;
-
-        if (this.material_type == "Textures")
+        if (this.material_type == "Textures") {
           geoTexture =
             json.CityObjects[cityObj].geometry[geom_i].texture[
-              this.textures_theme
+              this.texture_theme
             ].values;
-        else geoTexture = null;
+        } else {
+          geoTexture = null;
+        }
 
         var i;
         var j;
@@ -571,18 +592,15 @@ export default {
           instance.scale(s.x, s.y, s.z);
           instance.translate(...referencePoint);
 
-
-
-          var vertice_num = geom.vertices.length;
-          for (var i = 0; i < instance.vertices.length; i++) {
-            geom.vertices.push(instance.vertices[i]);
+          var a;
+          for (a = 0; a < instance.vertices.length; a++) {
+            geom.vertices.push(instance.vertices[a]);
           }
-          console.log(instance);
-          for (var j = 0; j < instance.faces.length; j++) {
-            geom.faces.push(instance.faces[j]);
+          for (a = 0; a < instance.faces.length; a++) {
+            geom.faces.push(instance.faces[a]);
 
             //TODO:
-            geom.faceVertexUvs[0].push(instance.faceVertexUvs[0][j]);
+            geom.faceVertexUvs[0].push(instance.faceVertexUvs[0][a]);
           }
         }
       }
@@ -724,18 +742,19 @@ export default {
           new_boundary.push(vertPos);
         } else {
           // Add vertex to geometry
-        var vertices_coordinates;
-        if (isTemplateGeom) {
-          vertices_coordinates =
-            json["geometry-templates"]["vertices-templates"];
-        } else {
-          vertices_coordinates = json.vertices;
-        }
-        // Add vertex to geometry
-        var point = new THREE.Vector3(
-          vertices_coordinates[index][0],
-          vertices_coordinates[index][1],
-          vertices_coordinates[index][2]);
+          var vertices_coordinates;
+          if (isTemplateGeom) {
+            vertices_coordinates =
+              json["geometry-templates"]["vertices-templates"];
+          } else {
+            vertices_coordinates = json.vertices;
+          }
+          // Add vertex to geometry
+          var point = new THREE.Vector3(
+            vertices_coordinates[index][0],
+            vertices_coordinates[index][1],
+            vertices_coordinates[index][2]
+          );
           geom.vertices.push(point);
 
           new_boundary.push(indices.length);
