@@ -71,3 +71,7 @@ https://pypi.org/project/cjio/
 ### How to run things locally
 https://threejs.org/docs/#manual/en/introduction/How-to-run-things-locally 
 
+
+# todo
+[]  try mesh way of instancing 
+
