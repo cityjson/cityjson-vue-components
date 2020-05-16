@@ -72,6 +72,6 @@ https://pypi.org/project/cjio/
 https://threejs.org/docs/#manual/en/introduction/How-to-run-things-locally 
 
 
-# todo
-[]  try mesh way of instancing 
+### demo
+toggle demo : https://www.dropbox.com/s/v369n5phuqe3xr0/toggle.mp4?dl=0
 
