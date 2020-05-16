@@ -18,11 +18,15 @@
           type="button"
           data-toggle="dropdown"
         >Change texture theme</button>
-        <div id="themes" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        </div>
+        <div id="themes" class="dropdown-menu" aria-labelledby="dropdownMenuButton"></div>
       </div>
     </div>
-    <three-js-viewer @getTextureThemes="getTextureThemes" :citymodel="citymodel" :texture_theme="texture_theme" :material_type="material_type"></three-js-viewer>
+    <three-js-viewer
+      @getTextureThemes="getTextureThemes"
+      :citymodel="citymodel"
+      :texture_theme="texture_theme"
+      :material_type="material_type"
+    ></three-js-viewer>
   </div>
 </template>
 
@@ -40,17 +44,19 @@ export default {
   data() {
     return {
       citymodel: test_cm,
-      texture_theme:"",
-      material_type:"Textures"
+      texture_theme: "",
+      material_type: "Textures"
     };
   },
   methods: {
     getTextureThemes(texture_themes) {
-      console.log(texture_themes)
-       for (var i=0;i<texture_themes.length;i++) {
-      $("#themes").append("<a class='dropdown-item'>"+texture_themes[i]+"</a>");
-        this.texture_theme=texture_themes[i]; //set the default theme~
-       }
+      console.log(texture_themes);
+      for (var i = 0; i < texture_themes.length; i++) {
+        $("#themes").append(
+          "<a class='dropdown-item'>" + texture_themes[i] + "</a>"
+        );
+      }
+      this.texture_theme = texture_themes[0]; //set the default theme~
     }
   }
 };
