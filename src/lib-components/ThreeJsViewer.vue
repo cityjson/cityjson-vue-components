@@ -164,6 +164,36 @@ export default {
       }
 
       this.renderer.render(this.scene, this.camera);
+    },
+        texture_theme: function() {
+      this.$parent.$emit("rendering", true);
+
+      setTimeout(async () => {
+        this.clearScene();
+
+        if (Object.keys(this.citymodel).length > 0) {
+          await this.loadCityObjects(this.citymodel);
+        }
+
+        this.renderer.render(this.scene, this.camera);
+
+        this.$parent.$emit("rendering", false);
+      }, 25);
+    },
+    material_type: function() {
+      this.$parent.$emit("rendering", true);
+
+      setTimeout(async () => {
+        this.clearScene();
+
+       if (Object.keys(this.citymodel).length > 0) {
+          await this.loadCityObjects(this.citymodel);
+        }
+
+        this.renderer.render(this.scene, this.camera);
+
+        this.$parent.$emit("rendering", false);
+      }, 25);
     }
   },
   methods: {
@@ -729,7 +759,7 @@ export default {
             }
             //assue if the outring has no url, dont consider inner rings
             else {
-              this.materials_index.push(this.materials.length - 1);
+              this.materials_index.push(json.appearance["textures"].length);
             }
           } else {
             ringTexture = [null];

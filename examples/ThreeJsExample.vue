@@ -8,8 +8,8 @@
           data-toggle="dropdown"
         >Change material</button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <a class="dropdown-item">object-type</a>
-          <a class="dropdown-item">Textures</a>
+          <a class="dropdown-item" @click="toggle_material_type('object-type')">object-type</a>
+          <a class="dropdown-item" @click="toggle_material_type('Textures')">Textures</a>
         </div>
       </div>
       <div class="dropdown">
@@ -18,7 +18,9 @@
           type="button"
           data-toggle="dropdown"
         >Change texture theme</button>
-        <div id="themes" class="dropdown-menu" aria-labelledby="dropdownMenuButton"></div>
+        <div id="themes" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+        </div>
       </div>
     </div>
     <three-js-viewer
@@ -45,18 +47,33 @@ export default {
     return {
       citymodel: test_cm,
       texture_theme: "",
-      material_type: "Textures"
+      material_type: "Textures", 
+      textureThemes:[] // all themes
     };
   },
   methods: {
     getTextureThemes(texture_themes) {
-      console.log(texture_themes);
+      texture_themes.push("test")
       for (var i = 0; i < texture_themes.length; i++) {
-        $("#themes").append(
-          "<a class='dropdown-item'>" + texture_themes[i] + "</a>"
-        );
+        //HELPPPP!!! Got crazy about the nested qoutes!
+        // Maybe this part can use v-for but I do know how to do it :(
+        var click_function="@click='toggle_texture_theme("+texture_themes[i]+")'"  
+
+        var html_theme =
+         " <a class='dropdown-item' "+click_function+">"+texture_themes[i]+"</a>"
+        $("#themes").append(html_theme);
+        console.log(html_theme)
       }
+      this.textureThemes=texture_themes
       this.texture_theme = texture_themes[0]; //set the default theme~
+    },
+    toggle_material_type: function(type) {
+      this.material_type = type;
+      console.log("the current material type is", type);
+    },
+    toggle_texture_theme: function(theme) {
+      this.texture_theme = theme;
+      console.log("the current texture theme is", theme);
     }
   }
 };
