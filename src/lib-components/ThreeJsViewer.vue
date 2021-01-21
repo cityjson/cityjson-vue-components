@@ -153,7 +153,6 @@ export default {
 		this.controls = null;
 		this.raycaster = null;
 		this.mouse = null;
-		this.geoms = {};
 		this.mesh_index = {};
 
 	},
