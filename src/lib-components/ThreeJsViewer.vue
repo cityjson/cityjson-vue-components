@@ -63,6 +63,8 @@ export default {
     this.mesh_index = {};
     this.meshVertices = [];
     this.meshTriangles = [];
+    this.spotLight = null;
+    this.ambLight = null;
   },
   async mounted() {
     this.$emit('rendering', true);
@@ -183,19 +185,13 @@ export default {
       this.raycaster = new THREE.Raycaster()
       this.mouse = new THREE.Vector2();
 
-      //add AmbientLight (light that is only there that there's a minimum of light and you can see color)
-      //kind of the natural daylight
-      var am_light = new THREE.AmbientLight(0xFFFFFF, 0.7); // soft white light
-      this.scene.add(am_light);
-
-      // Add directional light
-      var spot_light = new THREE.SpotLight(0xDDDDDD);
-      spot_light.position.set(84616, -1, 447422);
-      spot_light.target = this.scene;
-      spot_light.castShadow = true;
-      spot_light.intensity = 0.4
-      spot_light.position.normalize()
-      this.scene.add(spot_light);
+			this.ambLight = new THREE.AmbientLight( 0xFFFFFF, 0.7 );
+			this.ambLight.name = "ambLight";
+			this.spotLight = new THREE.SpotLight( 0xDDDDDD, 0.4 );
+			this.spotLight.name = "spotLight";
+			this.spotLight.target = this.scene;
+			this.spotLight.castShadow = true;
+      this.scene.add( this.spotLight, this.ambLight );
       
       //render & orbit controls
       this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -204,21 +200,17 @@ export default {
       });
     },
     clearScene() {
-      while(this.scene.children.length > 0){ 
-        this.scene.remove(this.scene.children[0]); 
-      }
 
-      var am_light = new THREE.AmbientLight(0xFFFFFF, 0.7); // soft white light
-      this.scene.add(am_light);
+			for ( var i = this.scene.children.length - 1; i >= 0; i -- ) {
 
-      // Add directional light
-      var spot_light = new THREE.SpotLight(0xDDDDDD);
-      spot_light.position.set(84616, -1, 447422);
-      spot_light.target = this.scene;
-      spot_light.castShadow = true;
-      spot_light.intensity = 0.4
-      spot_light.position.normalize()
-      this.scene.add(spot_light);
+				if ( this.scene.children[ i ].name != "ambLight" && this.scene.children[ i ].name != "spotLight" ) {
+
+          this.scene.remove( this.scene.children[ i ] );
+          
+        }
+        
+			}
+
     },
     //convert CityObjects to mesh and add them to the viewer
     async loadCityObjects(data) {
@@ -293,6 +285,7 @@ export default {
         this.camera.far = maxZ * 1000;
         this.camera.updateProjectionMatrix();
         this.controls.target.set( midX, midY, 0 );
+        this.spotLight.position.set( midX, midY, maxZ * 10 );
 
       }
 
