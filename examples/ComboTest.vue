@@ -27,7 +27,7 @@
         </div>
         <three-js-viewer
           :citymodel="test_cityjson_file"
-          :selected_objid="selected_id"
+          :selected-objid="selected_id"
           @object_clicked="selected_id = $event"
         />
       </div>

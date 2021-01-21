@@ -14,8 +14,18 @@ import { CityJSONLoader } from 'cityjson-threejs-loader';
 export default {
 	name: 'ThreeJsViewer',
 	props: {
-		citymodel: Object,
-		selectedObjId: String,
+		citymodel: {
+			type: Object,
+			default: function () {
+
+				return {};
+
+			}
+		},
+		selectedObjid: {
+			type: String,
+			default: null
+		},
 		objectColors: {
 			type: Object,
 			default: function () {
@@ -116,7 +126,7 @@ export default {
 			},
 			deep: true
 		},
-		selectedObjId: function ( newId, oldId ) {
+		selectedObjid: function ( newId, oldId ) {
 
 			if ( oldId != null && oldId in this.citymodel.CityObjects ) {
 
