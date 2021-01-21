@@ -13,7 +13,7 @@ export default {
   props: {
     citymodel: Object,
     selected_objid: String,
-    object_colors: {
+    objectColors: {
       type: Object,
       default: function() {
         return {
@@ -61,6 +61,8 @@ export default {
     this.geoms = {};
     this.meshes = [];
     this.mesh_index = {};
+    this.meshVertices = [];
+    this.meshTriangles = [];
   },
   async mounted() {
     this.$emit('rendering', true);
@@ -163,6 +165,8 @@ export default {
       var ratio = $("#viewer").width() / $("#viewer").height();
       this.camera = new THREE.PerspectiveCamera( 60, ratio, 0.001, 1000 );
       this.camera.up.set( 0, 0, 1 );
+      this.camera.position.set(0, 0, 2);
+      this.camera.lookAt(0, 0, 0);
       
       this.renderer = new THREE.WebGLRenderer({
         antialias: true
@@ -218,185 +222,254 @@ export default {
       this.scene.add(spot_light);
     },
     //convert CityObjects to mesh and add them to the viewer
-    async loadCityObjects(json) {      
-      //create one geometry that contains all vertices (in normalized form)
-      //normalize must be done for all coordinates as otherwise the objects are at same pos and have the same size
-      var normGeom = new THREE.Geometry()
-        var i
-      for (i = 0; i < json.vertices.length; i++) {
-        var point = new THREE.Vector3(
-          json.vertices[i][0],
-          json.vertices[i][1],
-          json.vertices[i][2]
-          );
-          normGeom.vertices.push(point)
-      }
-      normGeom.normalize()
-      
-      for (i = 0; i < json.vertices.length; i++) {
-        json.vertices[i][0] = normGeom.vertices[i].x;
-        json.vertices[i][1] = normGeom.vertices[i].y;
-        json.vertices[i][2] = normGeom.vertices[i].z;
-      }
-      
-      var stats = this.getStats(json.vertices)
-      var avgX = stats[3]
-      var avgY = stats[4]
-      var avgZ = stats[5]
-      
-      if (!this.camera_init)
-      {
-        this.camera.position.set(0, 0, 2);
-        this.camera.lookAt(avgX, avgY, avgZ);
-        
-        this.controls.target.set(avgX,
-          avgY,
-          avgZ);
-        
-        //enable movement parallel to ground
-        this.controls.screenSpacePanning = true;
+    async loadCityObjects(data) {
 
-        this.camera_init = true;
-      }
-      
-      //iterate through all cityObjects
-      for (var cityObj in json.CityObjects) {
-        
-        // try {
-        await this.parseObject(cityObj, json)
-          
-        // } catch (e) {
-        //   console.log("ERROR at creating: " + cityObj + "\n" + e.message);
-        //   continue
-        // }
-        
-        //set color of object
-        var coType = json.CityObjects[cityObj].type;
-        var material = new THREE.MeshLambertMaterial();
-        material.color.setHex(this.object_colors[coType]);
-        
-        //create mesh
-        //geoms[cityObj].normalize()
-        var _id = cityObj
-        var coMesh = new THREE.Mesh(this.geoms[_id], material)
-        coMesh.name = cityObj;
-        coMesh.castShadow = true;
-        coMesh.receiveShadow = true;
-        this.scene.add(coMesh);
-        this.meshes.push(coMesh);
-        this.mesh_index[_id] = coMesh;
-      }
-    },
-    //convert json file to viwer-object
-    async parseObject(cityObj, json) {
-      if (!(json.CityObjects[cityObj].geometry &&
-        json.CityObjects[cityObj].geometry.length > 0))
-      {
-        return;
-      }
-   
-      //create geometry and empty list for the vertices
-      var geom = new THREE.Geometry()
-      var vertices = [] // List of global indices in this surface
+      console.log( this.getStats( data.vertices ) );
 
-      for (var geom_i = 0; geom_i < json.CityObjects[cityObj].geometry.length; geom_i++)
-      {
-        //each geometrytype must be handled different
-        var geomType = json.CityObjects[cityObj].geometry[geom_i].type
-        
-        var i;
-        var j;
-        if (geomType == "Solid") {
-          var shells = json.CityObjects[cityObj].geometry[geom_i].boundaries;
+      if (typeof data === "object") {
 
-          for (i = 0; i < shells.length; i++)
-          {
-            await this.parseShell(geom, shells[i], vertices, json);
+          for (const coType in this.objectColors) {
+
+              this.meshVertices[coType] = [];
+              this.meshTriangles[coType] = [];
+
           }
-        } else if (geomType == "MultiSurface" || geomType == "CompositeSurface") {
-          var surfaces = json.CityObjects[cityObj].geometry[geom_i].boundaries;
 
-          await this.parseShell(geom, surfaces, vertices, json);
-        } else if (geomType == "MultiSolid" || geomType == "CompositeSolid") {
-          var solids = json.CityObjects[cityObj].geometry[geom_i].boundaries;
+          for (const objectId in data.CityObjects) {
 
-          for (i = 0; i < solids.length; i++) {
-            for (j = 0; j < solids[i].length; j++) {
-              await this.parseShell(geom, solids[i][j], vertices, json);
+              this.parseObject(objectId, data);
+
+          }
+
+          for (const coType in this.objectColors) {
+
+              if (this.meshVertices[coType].length == 0) {
+
+                  continue;
+
+              }
+
+              const geom = new THREE.BufferGeometry();
+
+              geom.setIndex(this.meshTriangles[coType]);
+              geom.setAttribute('position', new THREE.Float32BufferAttribute(this.meshVertices[coType].length * 3, 3));
+
+              let positions = geom.attributes.position.array;
+
+              let i = 0;
+
+              for (const index of this.meshVertices[coType]) {
+
+                  // console.log( this.meshVertices[ coType ] );
+
+                  const vertex = data.vertices[index];
+
+                  positions[i * 3] = vertex[0];
+                  positions[i * 3 + 1] = vertex[1];
+                  positions[i * 3 + 2] = vertex[2];
+
+                  i += 1;
+
+              }
+
+              geom.attributes.position.needsUpdate = true;
+
+              const material = new THREE.MeshLambertMaterial();
+              material.color.setHex(this.objectColors[coType]);
+
+              const mesh = new THREE.Mesh(geom, material);
+              mesh.name = coType;
+              mesh.castShadow = true;
+              mesh.receiveShadow = true;
+
+              this.normaliseGeom(geom);
+
+              geom.computeVertexNormals();
+
+              console.log( mesh );
+
+              this.scene.add(mesh);
+
+          }
+
+      }
+
+    },
+
+    normaliseGeom(geom) {
+
+        geom.computeBoundingSphere();
+
+        const center = geom.boundingSphere.center;
+        const radius = geom.boundingSphere.radius;
+        const s = radius === 0 ? 1 : 1.0 / radius;
+
+        const matrix = new THREE.Matrix4();
+        matrix.set(
+            s, 0, 0, -s * center.x,
+            0, s, 0, -s * center.y,
+            0, 0, s, -s * center.z,
+            0, 0, 0, 1
+        );
+
+        geom.applyMatrix4(matrix);
+
+    },
+
+    parseObject(objectId, json) {
+
+        const cityObject = json.CityObjects[objectId];
+
+        if (!(cityObject.geometry &&
+                cityObject.geometry.length > 0)) {
+
+            return;
+
+        }
+
+        const coType = cityObject.type;
+        let vertices = this.meshVertices[coType];
+        let triangles = this.meshTriangles[coType];
+
+        for (let geom_i = 0; geom_i < cityObject.geometry.length; geom_i++) {
+
+            const geomType = cityObject.geometry[geom_i].type;
+
+            if (geomType == "Solid") {
+
+                const shells = cityObject.geometry[geom_i].boundaries;
+
+                for (let i = 0; i < shells.length; i++) {
+
+                    this.parseShell(shells[i], vertices, triangles, json);
+
+                }
+
+            } else if (geomType == "MultiSurface" || geomType == "CompositeSurface") {
+
+                const surfaces = cityObject.geometry[geom_i].boundaries;
+
+                this.parseShell(surfaces, vertices, triangles, json);
+
+            } else if (geomType == "MultiSolid" || geomType == "CompositeSolid") {
+
+                const solids = cityObject.geometry[geom_i].boundaries;
+
+                for (let i = 0; i < solids.length; i++) {
+
+                    for (let j = 0; j < solids[i].length; j++) {
+
+                        this.parseShell(solids[i][j], vertices, triangles, json);
+
+                    }
+
+                }
+
             }
-          }
+
         }
-      }
-            
-      //needed for shadow
-      geom.computeFaceNormals();
-      
-      //add geom to the list
-      var _id = cityObj
-      this.geoms[_id] = geom
-      
-      return ("")
+
     },
-    async parseShell(geom, boundaries, vertices, json)
-    {
-      // Contains the boundary but with the right verticeId
-      var i; // 
-      var j;
-      for (i = 0; i < boundaries.length; i++) {
-        var boundary = []
-        var holes = []
+	parseShell( boundaries, vertices, triangles, json ) {
 
-        for (j = 0; j < boundaries[i].length; j++) {
-          if (boundary.length > 0)
-          {
-            holes.push(boundary.length);
-          }
-          var new_boundary = this.extractLocalIndices(geom, boundaries[i][j], vertices, json)
-          boundary.push(...new_boundary);
-        }
+		// Contains the boundary but with the right verticeId
+		for ( let i = 0; i < boundaries.length; i ++ ) {
 
-        if (boundary.length == 3) {
-          geom.faces.push(new THREE.Face3(boundary[0], boundary[1], boundary[2]))
-        }
-        else if (boundary.length > 3) {
-          //create list of points
-          var pList = []
-          var k
-          for (k = 0; k < boundary.length; k++) {
-            pList.push({
-              x: json.vertices[vertices[boundary[k]]][0],
-              y: json.vertices[vertices[boundary[k]]][1],
-              z: json.vertices[vertices[boundary[k]]][2]
-            })
-          }
+			let boundary = [];
+			let holes = [];
 
-          //get normal of these points
-          var normal = await this.get_normal_newell(pList)
-          
-          //convert to 2d (for triangulation)
-          var pv = []
-          for (k = 0; k < pList.length; k++) {
-            var re = await this.to_2d(pList[k], normal)
-            pv.push(re.x)
-            pv.push(re.y)
-          }
-            
-          //triangulate
-          var tr = await earcut(pv, holes, 2);
-          
-          //create faces based on triangulation
-          for (k = 0; k < tr.length; k += 3) {
-            geom.faces.push(
-              new THREE.Face3(
-                boundary[tr[k]],
-                boundary[tr[k + 1]],
-                boundary[tr[k + 2]]
-                )
-                )
-          }
-        }
-      }
-    },
+			for ( let j = 0; j < boundaries[ i ].length; j ++ ) {
+
+				if ( boundary.length > 0 ) {
+
+					holes.push( boundary.length );
+
+				}
+
+				// const new_boundary = this.extractLocalIndices( geom, boundaries[ i ][ j ], vertices, json );
+				// boundary.push( ...new_boundary );
+				boundary.push( ...boundaries[ i ][ j ] );
+
+			}
+
+			if ( boundary.length == 3 ) {
+
+				for ( let n = 0; n < 3; n ++ ) {
+
+					const index = vertices.indexOf( boundary[ n ] );
+
+					if ( index == - 1 ) {
+
+						triangles.push( vertices.length );
+						vertices.push( boundary[ n ] );
+
+					} else {
+
+						triangles.push( index );
+
+					}
+
+				}
+
+
+			} else if ( boundary.length > 3 ) {
+
+				//create list of points
+				let pList = [];
+				for ( let k = 0; k < boundary.length; k ++ ) {
+
+					pList.push( {
+						x: json.vertices[ boundary[ k ] ][ 0 ],
+						y: json.vertices[ boundary[ k ] ][ 1 ],
+						z: json.vertices[ boundary[ k ] ][ 2 ]
+					} );
+
+				}
+
+				//get normal of these points
+				const normal = this.get_normal_newell( pList );
+
+				//convert to 2d (for triangulation)
+				let pv = [];
+				for ( let k = 0; k < pList.length; k ++ ) {
+
+					const re = this.to_2d( pList[ k ], normal );
+					pv.push( re.x );
+					pv.push( re.y );
+
+				}
+
+				//triangulate
+				const tr = earcut( pv, holes, 2 );
+
+				// create faces based on triangulation
+				for ( let k = 0; k < tr.length; k += 3 ) {
+
+					for ( let n = 0; n < 3; n ++ ) {
+
+						const vertex = boundary[ tr[ k + n ] ];
+						const index = vertices.indexOf( vertex );
+
+						if ( index == - 1 ) {
+
+							triangles.push( vertices.length );
+							vertices.push( vertex );
+
+						} else {
+
+							triangles.push( index );
+
+						}
+
+					}
+
+				}
+
+			}
+
+		}
+
+	},
     extractLocalIndices(geom, boundary, indices, json)
     {
       var new_boundary = []
