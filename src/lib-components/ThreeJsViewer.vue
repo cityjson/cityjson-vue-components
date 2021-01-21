@@ -139,6 +139,8 @@ export default {
   },
   methods: {
     handleClick() {
+      console.log( this.camera );
+
       var rect = this.renderer.domElement.getBoundingClientRect();
       //get mouseposition
       this.mouse.x = ((event.clientX - rect.left) / this.renderer.domElement.clientWidth) * 2 - 1;
@@ -164,9 +166,6 @@ export default {
       this.scene = new THREE.Scene();
       var ratio = $("#viewer").width() / $("#viewer").height();
       this.camera = new THREE.PerspectiveCamera( 60, ratio, 0.001, 1000 );
-      this.camera.up.set( 0, 0, 1 );
-      this.camera.position.set(0, 0, 2);
-      this.camera.lookAt(0, 0, 0);
       
       this.renderer = new THREE.WebGLRenderer({
         antialias: true
@@ -224,8 +223,6 @@ export default {
     //convert CityObjects to mesh and add them to the viewer
     async loadCityObjects(data) {
 
-      console.log( this.getStats( data.vertices ) );
-
       if (typeof data === "object") {
 
           for (const coType in this.objectColors) {
@@ -240,6 +237,8 @@ export default {
               this.parseObject(objectId, data);
 
           }
+
+          const group = new THREE.Group();
 
           for (const coType in this.objectColors) {
 
@@ -256,19 +255,13 @@ export default {
 
               let positions = geom.attributes.position.array;
 
-              let i = 0;
+              for ( const [ i, vertexIndex ] of this.meshVertices[coType].entries() ) {
 
-              for (const index of this.meshVertices[coType]) {
+                  const vertex = data.vertices[ vertexIndex ];
 
-                  // console.log( this.meshVertices[ coType ] );
-
-                  const vertex = data.vertices[index];
-
-                  positions[i * 3] = vertex[0];
-                  positions[i * 3 + 1] = vertex[1];
-                  positions[i * 3 + 2] = vertex[2];
-
-                  i += 1;
+                  positions[i * 3] = vertex[ 0 ];
+                  positions[i * 3 + 1] = vertex[ 1 ];
+                  positions[i * 3 + 2] = vertex[ 2 ];
 
               }
 
@@ -282,37 +275,26 @@ export default {
               mesh.castShadow = true;
               mesh.receiveShadow = true;
 
-              this.normaliseGeom(geom);
-
               geom.computeVertexNormals();
 
-              console.log( mesh );
-
-              this.scene.add(mesh);
+              group.add( mesh );
 
           }
 
+        this.scene.add( group );
+
+        const bbox = this.getExtent( data );
+        const midX = bbox[ 0 ] + ( ( bbox[ 3 ] - bbox[ 0 ] ) / 2 );
+        const midY = bbox[ 1 ] + ( ( bbox[ 4 ] - bbox[ 1 ] ) / 2 );
+        const maxZ = bbox[ 5 ];
+
+        this.camera.position.set( midX, midY, maxZ * 10 );
+        this.camera.lookAt( midX, midY, 0 );
+        this.camera.far = maxZ * 1000;
+        this.camera.updateProjectionMatrix();
+        this.controls.target.set( midX, midY, 0 );
+
       }
-
-    },
-
-    normaliseGeom(geom) {
-
-        geom.computeBoundingSphere();
-
-        const center = geom.boundingSphere.center;
-        const radius = geom.boundingSphere.radius;
-        const s = radius === 0 ? 1 : 1.0 / radius;
-
-        const matrix = new THREE.Matrix4();
-        matrix.set(
-            s, 0, 0, -s * center.x,
-            0, s, 0, -s * center.y,
-            0, 0, s, -s * center.z,
-            0, 0, 0, 1
-        );
-
-        geom.applyMatrix4(matrix);
 
     },
 
@@ -500,41 +482,100 @@ export default {
 
       return new_boundary
     },
-    getStats(vertices) {
+    getExtent( data ) {
+
+      var bbox;
+
+      if ( data[ "metadata" ] != undefined && data[ "metadata" ][ "geographicalExtent" ] != undefined && 1 == 2) {
+
+
+        bbox = data[ "metadata" ][ "geographicalExtent" ];
+        console.log( bbox );
+
+      } else {
       
-      var minX = Number.MAX_VALUE;
-      var minY = Number.MAX_VALUE;
-      var minZ = Number.MAX_VALUE;
-      
-      var sumX = 0;
-      var sumY = 0;
-      var sumZ = 0
-      var counter = 0
-      
-      for (var i in vertices){
-        sumX = sumX + vertices[i][0]
-        if (vertices[i][0] < minX){
-          minX = vertices[i][0]
+
+        const vertices = data.vertices;
+
+        bbox = [ Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE, Number.MIN_VALUE, Number.MIN_VALUE, Number.MIN_VALUE ];
+
+        for ( const v of vertices ) {
+
+          const x = v[ 0 ];
+          const y = v[ 1 ];
+          const z = v[ 2 ];
+
+          if ( x < bbox[ 0 ] ) {
+
+            bbox[ 0 ] = x;
+
+          } else if ( x > bbox[ 3 ] ) {
+
+            bbox[ 3 ] = x;
+
+          }
+
+          if ( y < bbox[ 1 ] ) {
+
+            bbox[ 1 ] = y;
+
+          } else if ( y > bbox[ 4 ] ) {
+
+            bbox[ 4 ] = y;
+
+          }
+
+          if ( z < bbox[ 2 ] ) {
+
+            bbox[ 2 ] = z;
+
+          } else if ( z > bbox[ 5 ] ) {
+
+            bbox[ 5 ] = z;
+
+          }
+
         }
-        
-        sumY = sumY + vertices[i][1]
-        if (vertices[i][1] < minY){
-          minY = vertices[i][1]
-        }
-        
-        if (vertices[i][2] < minZ){
-          minZ = vertices[i][2]
-        }
-        
-        sumZ = sumZ + vertices[i][2]
-        counter = counter + 1
+
       }
+
+      console.log( bbox );
+
+      return bbox;
       
-      var avgX = sumX/counter
-      var avgY = sumY/counter
-      var avgZ = sumZ/counter
+      // var minX = Number.MAX_VALUE;
+      // var minY = Number.MAX_VALUE;
+      // var minZ = Number.MAX_VALUE;
       
-      return ([minX, minY, minZ, avgX, avgY, avgZ])
+      // var sumX = 0;
+      // var sumY = 0;
+      // var sumZ = 0
+      // var counter = 0
+      
+      // for (var i in vertices){
+      //   sumX = sumX + vertices[i][0]
+      //   if (vertices[i][0] < minX){
+      //     minX = vertices[i][0]
+      //   }
+        
+      //   sumY = sumY + vertices[i][1]
+      //   if (vertices[i][1] < minY){
+      //     minY = vertices[i][1]
+      //   }
+        
+      //   if (vertices[i][2] < minZ){
+      //     minZ = vertices[i][2]
+      //   }
+        
+      //   sumZ = sumZ + vertices[i][2]
+      //   counter = counter + 1
+      // }
+      
+      // var avgX = sumX/counter
+      // var avgY = sumY/counter
+      // var avgZ = sumZ/counter
+      
+      // return ([minX, minY, minZ, avgX, avgY, avgZ])
       
     },
     //-- calculate normal of a set of points
