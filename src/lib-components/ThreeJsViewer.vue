@@ -61,8 +61,9 @@ export default {
     this.geoms = {};
     this.meshes = [];
     this.mesh_index = {};
-    this.meshVertices = [];
-    this.meshTriangles = [];
+    this.meshVertices = {};
+    this.meshTriangles = {};
+    this.meshTriangleIDs = {};
     this.spotLight = null;
     this.ambLight = null;
   },
@@ -219,8 +220,9 @@ export default {
 
           for (const coType in this.objectColors) {
 
-              this.meshVertices[coType] = [];
-              this.meshTriangles[coType] = [];
+              this.meshVertices[ coType ] = [];
+              this.meshTriangles[ coType ] = [];
+              this.meshTriangleIDs[ coType ] = [];
 
           }
 
@@ -231,6 +233,8 @@ export default {
           }
 
           const group = new THREE.Group();
+
+          console.log( this.meshTriangleIDs );
 
           for (const coType in this.objectColors) {
 
@@ -258,6 +262,7 @@ export default {
               }
 
               geom.attributes.position.needsUpdate = true;
+              geom.computeVertexNormals();
 
               const material = new THREE.MeshLambertMaterial();
               material.color.setHex(this.objectColors[coType]);
@@ -267,7 +272,7 @@ export default {
               mesh.castShadow = true;
               mesh.receiveShadow = true;
 
-              geom.computeVertexNormals();
+              mesh.triangleIDs = this.meshTriangleIDs[ coType ];
 
               group.add( mesh );
 
@@ -275,17 +280,22 @@ export default {
 
         this.scene.add( group );
 
-        const bbox = this.getExtent( data );
+        console.log( group );
+
+        const bbox = this.getBbox( data );
         const midX = bbox[ 0 ] + ( ( bbox[ 3 ] - bbox[ 0 ] ) / 2 );
         const midY = bbox[ 1 ] + ( ( bbox[ 4 ] - bbox[ 1 ] ) / 2 );
         const maxZ = bbox[ 5 ];
+        // const minZ = bbox[ 2 ];
 
         this.camera.position.set( midX, midY, maxZ * 10 );
         this.camera.lookAt( midX, midY, 0 );
         this.camera.far = maxZ * 1000;
+        this.camera.near = maxZ;
         this.camera.updateProjectionMatrix();
         this.controls.target.set( midX, midY, 0 );
-        this.spotLight.position.set( midX, midY, maxZ * 10 );
+        this.spotLight.position.set( midX, midY, maxZ * 1000 );
+        this.spotLight.target = group;
 
       }
 
@@ -303,8 +313,9 @@ export default {
         }
 
         const coType = cityObject.type;
-        let vertices = this.meshVertices[coType];
-        let triangles = this.meshTriangles[coType];
+        let vertices = this.meshVertices[ coType ];
+        let triangles = this.meshTriangles[ coType ];
+        let ids = this.meshTriangleIDs[ coType ];
 
         for (let geom_i = 0; geom_i < cityObject.geometry.length; geom_i++) {
 
@@ -316,7 +327,7 @@ export default {
 
                 for (let i = 0; i < shells.length; i++) {
 
-                    this.parseShell(shells[i], vertices, triangles, json);
+                    this.parseShell(shells[i], vertices, triangles, ids, objectId, json);
 
                 }
 
@@ -324,7 +335,7 @@ export default {
 
                 const surfaces = cityObject.geometry[geom_i].boundaries;
 
-                this.parseShell(surfaces, vertices, triangles, json);
+                this.parseShell(surfaces, vertices, triangles, ids, objectId, json);
 
             } else if (geomType == "MultiSolid" || geomType == "CompositeSolid") {
 
@@ -334,7 +345,7 @@ export default {
 
                     for (let j = 0; j < solids[i].length; j++) {
 
-                        this.parseShell(solids[i][j], vertices, triangles, json);
+                        this.parseShell(solids[i][j], vertices, triangles, ids, objectId, json);
 
                     }
 
@@ -345,7 +356,7 @@ export default {
         }
 
     },
-	parseShell( boundaries, vertices, triangles, json ) {
+	parseShell( boundaries, vertices, triangles, ids, id, json ) {
 
 		// Contains the boundary but with the right verticeId
 		for ( let i = 0; i < boundaries.length; i ++ ) {
@@ -376,13 +387,15 @@ export default {
 					if ( index == - 1 ) {
 
 						triangles.push( vertices.length );
-						vertices.push( boundary[ n ] );
+            vertices.push( boundary[ n ] );
 
 					} else {
 
 						triangles.push( index );
 
-					}
+          }
+          
+          ids.push( id );
 
 				}
 
@@ -475,19 +488,31 @@ export default {
 
       return new_boundary
     },
-    getExtent( data ) {
+    getBbox( data ) {
 
       var bbox;
 
-      if ( data[ "metadata" ] != undefined && data[ "metadata" ][ "geographicalExtent" ] != undefined && 1 == 2) {
+      if ( data[ "metadata" ] != undefined && data[ "metadata" ][ "geographicalExtent" ] != undefined ) {
 
 
         bbox = data[ "metadata" ][ "geographicalExtent" ];
-        console.log( bbox );
+
+        if ( data[ "transform" ] != undefined ) {
+
+          const transform = data[ "transform" ];
+
+          for (let i = 0; i < 3; i ++ ) {
+
+            bbox[ i ] = bbox[ i ] - transform[ "translate" ][ i ];
+            bbox[ i + 3 ] = ( bbox[ i + 3 ] - transform[ "translate" ][ i ] ) / transform[ "scale" ][ i ];
+
+          }
+
+        }
+        
 
       } else {
       
-
         const vertices = data.vertices;
 
         bbox = [ Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE, Number.MIN_VALUE, Number.MIN_VALUE, Number.MIN_VALUE ];
@@ -532,43 +557,7 @@ export default {
 
       }
 
-      console.log( bbox );
-
       return bbox;
-      
-      // var minX = Number.MAX_VALUE;
-      // var minY = Number.MAX_VALUE;
-      // var minZ = Number.MAX_VALUE;
-      
-      // var sumX = 0;
-      // var sumY = 0;
-      // var sumZ = 0
-      // var counter = 0
-      
-      // for (var i in vertices){
-      //   sumX = sumX + vertices[i][0]
-      //   if (vertices[i][0] < minX){
-      //     minX = vertices[i][0]
-      //   }
-        
-      //   sumY = sumY + vertices[i][1]
-      //   if (vertices[i][1] < minY){
-      //     minY = vertices[i][1]
-      //   }
-        
-      //   if (vertices[i][2] < minZ){
-      //     minZ = vertices[i][2]
-      //   }
-        
-      //   sumZ = sumZ + vertices[i][2]
-      //   counter = counter + 1
-      // }
-      
-      // var avgX = sumX/counter
-      // var avgY = sumY/counter
-      // var avgZ = sumZ/counter
-      
-      // return ([minX, minY, minZ, avgX, avgY, avgZ])
       
     },
     //-- calculate normal of a set of points
