@@ -114,7 +114,8 @@
           id="json_data"
           v-model="jsonString"
           class="form-control"
-        />
+        >
+        </textarea>
         <div class="d-flex justify-content-end mt-2">
           <button
             type="button"
@@ -267,9 +268,9 @@ export default {
 		},
 		saveChanges() {
 
-			var card_id = $.escapeSelector( this.cityobject_id );
-			var new_json = $( `#${card_id} #json_data` ).val();
-			var new_cityobject = JSON.parse( new_json );
+			const card_id = $.escapeSelector( this.cityobject_id );
+			const new_json = document.querySelector( `#${card_id} #json_data` ).value;
+			const new_cityobject = JSON.parse( new_json );
 
 			this.$emit( 'input', new_cityobject );
 

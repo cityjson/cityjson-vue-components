@@ -9,7 +9,7 @@
           @object_clicked="selected_id = $event"
         />
       </div>
-      <div class="col-8 h-100">
+      <div class="col-8 h-100 p-0">
         <div
           class="col-auto m-2 =0"
           style="position: absolute; z-index: 1"

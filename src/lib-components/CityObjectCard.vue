@@ -18,8 +18,6 @@
 </template>
 
 <script>
-import $ from 'jquery';
-
 import CityObjectInfo from './CityObjectInfo.vue';
 
 export default {
@@ -148,13 +146,11 @@ export default {
 			}
 
 		},
-		saveChanges() {
+		saveChanges( newCityObject ) {
 
-			var card_id = $.escapeSelector( this.cityobject_id );
-			var new_json = $( `#${card_id} #json_data` ).val();
-			var new_cityobject = JSON.parse( new_json );
+			console.log( newCityObject );
 
-			this.$emit( 'input', new_cityobject );
+			this.$emit( 'input', newCityObject );
 
 		}
 	}

@@ -6,7 +6,6 @@
 </template>
 
 <script>
-import $ from 'jquery';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { CityJSONLoader, CityJSONWorkerParser } from 'cityjson-threejs-loader';
@@ -98,24 +97,23 @@ export default {
 
 				this.$emit( 'rendering', true );
 
-				setTimeout( async () => {
+				this.clearScene();
 
-					this.clearScene();
+				const parser = new CityJSONWorkerParser();
 
-					if ( Object.keys( newVal ).length > 0 ) {
+				const scope = this;
+				parser.onChunkLoad = () => {
 
-						const loader = new CityJSONLoader();
-						loader.load( this.citymodel );
+					scope.renderer.render( scope.scene, scope.camera );
 
-						this.scene.add( loader.scene );
+				};
 
-					}
+				const loader = new CityJSONLoader( parser );
+				loader.load( this.citymodel );
 
-					this.renderer.render( this.scene, this.camera );
+				this.scene.add( loader.scene );
 
-					this.$emit( 'rendering', false );
-
-				}, 25 );
+				this.$emit( 'rendering', false );
 
 			},
 			deep: true
@@ -176,9 +174,9 @@ export default {
 
 		let self = this;
 
-		$( "#viewer" ).dblclick( function ( eventData ) {
+		this.renderer.domElement.addEventListener( 'dblclick', ev => {
 
-			if ( eventData.button == 0 ) { //leftClick
+			if ( ev.button == 0 ) { //leftClick
 
 				self.handleClick();
 
@@ -226,8 +224,10 @@ export default {
 		},
 		initScene() {
 
+			const viewer = document.getElementById( "viewer" );
+			const ratio = viewer.clientWidth / viewer.clientHeight;
+
 			this.scene = new THREE.Scene();
-			var ratio = $( "#viewer" ).width() / $( "#viewer" ).height();
 			this.camera = new THREE.PerspectiveCamera( 60, ratio, 0.0001, 4000 );
 			this.camera.position.set( 10, 10, 10 );
 			this.camera.up.set( 0, 0, 1 );
@@ -236,9 +236,8 @@ export default {
 				antialias: true
 			} );
 			this.renderer.outputEncoding = sRGBEncoding;
-			var viewer = document.getElementById( "viewer" );
 			viewer.appendChild( this.renderer.domElement );
-			this.renderer.setSize( $( "#viewer" ).width(), $( "#viewer" ).height() );
+			this.renderer.setSize( viewer.clientWidth, viewer.clientHeight );
 			this.renderer.setClearColor( this.backgroundColor );
 			this.renderer.shadowMap.enabled = true;
 			this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
