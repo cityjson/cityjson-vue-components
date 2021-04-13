@@ -108,13 +108,6 @@ export default {
 
 						this.scene.add( loader.scene );
 
-						const scope = this;
-						loader.scene.traverse( mesh => {
-
-							scope.mesh_index[ mesh.name ] = mesh;
-
-						} );
-
 					}
 
 					this.renderer.render( this.scene, this.camera );
@@ -126,20 +119,19 @@ export default {
 			},
 			deep: true
 		},
-		selectedObjid: function ( newId, oldId ) {
+		selectedObjid: function ( newId ) {
 
-			if ( oldId != null && oldId in this.citymodel.CityObjects ) {
+			const idx = Object.keys( this.citymodel.CityObjects ).indexOf( newId );
 
-				var coType = this.citymodel.CityObjects[ oldId ].type;
-				this.mesh_index[ oldId ].material.color.setHex( this.objectColors[ coType ] );
+			this.scene.traverse( c => {
 
-			}
+				if ( c.material ) {
 
-			if ( newId != null ) {
+					c.material.uniforms.highlightedObjId.value = idx;
 
-				this.mesh_index[ newId ].material.color.setHex( 0xdda500 );
+				}
 
-			}
+			} );
 
 			this.renderer.render( this.scene, this.camera );
 
@@ -153,7 +145,6 @@ export default {
 		this.controls = null;
 		this.raycaster = null;
 		this.mouse = null;
-		this.mesh_index = {};
 
 	},
 	mounted() {
@@ -201,7 +192,6 @@ export default {
 		handleClick() {
 
 			var rect = this.renderer.domElement.getBoundingClientRect();
-			//get mouseposition
 			this.mouse.x = ( ( event.clientX - rect.left ) / this.renderer.domElement.clientWidth ) * 2 - 1;
 			this.mouse.y = - ( ( event.clientY - rect.top ) / this.renderer.domElement.clientHeight ) * 2 + 1;
 
@@ -209,7 +199,7 @@ export default {
 			this.raycaster.setFromCamera( this.mouse, this.camera );
 
 			//calculate intersects
-			var intersects = this.raycaster.intersectObjects( this.scene.children, true );
+			var intersects = this.raycaster.intersectObject( this.scene, true );
 
 			//if clicked on nothing return
 			if ( intersects.length == 0 ) {
@@ -220,8 +210,17 @@ export default {
 			}
 
 			//get the id of the first object that intersects (equals the clicked object)
-			var cityObjId = intersects[ 0 ].object.name;
-			this.$emit( 'object_clicked', cityObjId );
+			const { face, object } = intersects[ 0 ];
+
+			const objIds = object.geometry.getAttribute( 'objectid' );
+
+			if ( objIds ) {
+
+				const idx = objIds.getX( face.a );
+				const objectId = Object.keys( this.citymodel.CityObjects )[ idx ];
+				this.$emit( 'object_clicked', objectId );
+
+			}
 
 		},
 		initScene() {
