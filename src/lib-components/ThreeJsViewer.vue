@@ -10,6 +10,7 @@ import $ from 'jquery';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { CityJSONLoader, CityJSONWorkerParser } from 'cityjson-threejs-loader';
+import { sRGBEncoding } from 'three';
 
 export default {
 	name: 'ThreeJsViewer',
@@ -234,6 +235,7 @@ export default {
 			this.renderer = new THREE.WebGLRenderer( {
 				antialias: true
 			} );
+			this.renderer.outputEncoding = sRGBEncoding;
 			var viewer = document.getElementById( "viewer" );
 			viewer.appendChild( this.renderer.domElement );
 			this.renderer.setSize( $( "#viewer" ).width(), $( "#viewer" ).height() );
