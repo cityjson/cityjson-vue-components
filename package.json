@@ -24,7 +24,8 @@
     "build:ssr": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format cjs",
     "build:es": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format es",
     "build:unpkg": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format iife",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "test": "parcel examples/ComboTest.html"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.11.2",
@@ -48,6 +49,7 @@
     "jest": "^26.6.3",
     "jest-cli": "^26.6.3",
     "minimist": "^1.2.0",
+    "parcel-bundler": "^1.12.5",
     "rollup": "^1.12.1",
     "rollup-plugin-buble": "^0.19.6",
     "rollup-plugin-commonjs": "^10.0.0",

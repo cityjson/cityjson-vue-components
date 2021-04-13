@@ -9,7 +9,7 @@
 import $ from 'jquery';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { CityJSONLoader } from 'cityjson-threejs-loader';
+import { CityJSONLoader, CityJSONWorkerParser } from 'cityjson-threejs-loader';
 
 export default {
 	name: 'ThreeJsViewer',
@@ -69,7 +69,7 @@ export default {
 
 	},
 	watch: {
-		backgroundColor: function ( newVal, ) {
+		backgroundColor: function ( newVal ) {
 
 			this.renderer.setClearColor( newVal );
 
@@ -77,7 +77,7 @@ export default {
 
 		},
 		objectColors: {
-			handler: function ( newVal, ) {
+			handler: function ( newVal ) {
 
 				const scope = this;
 
@@ -93,7 +93,7 @@ export default {
 			deep: true
 		},
 		citymodel: {
-			handler: async function ( newVal, ) {
+			handler: function ( newVal ) {
 
 				this.$emit( 'rendering', true );
 
@@ -156,7 +156,7 @@ export default {
 		this.mesh_index = {};
 
 	},
-	async mounted() {
+	mounted() {
 
 		this.$emit( 'rendering', true );
 
@@ -164,18 +164,19 @@ export default {
 
 		if ( Object.keys( this.citymodel ).length > 0 ) {
 
-			const loader = new CityJSONLoader();
+			const parser = new CityJSONWorkerParser();
+
+			const scope = this;
+			parser.onChunkLoad = () => {
+
+				scope.renderer.render( scope.scene, scope.camera );
+
+			};
+
+			const loader = new CityJSONLoader( parser );
 			loader.load( this.citymodel );
 
 			this.scene.add( loader.scene );
-
-			const scope = this;
-
-			loader.scene.traverse( mesh => {
-
-				scope.mesh_index[ mesh.name ] = mesh;
-
-			} );
 
 		}
 
