@@ -100,6 +100,7 @@ export default {
 				this.clearScene();
 
 				const parser = new CityJSONWorkerParser();
+				parser.chunkSize = 2000;
 
 				const scope = this;
 				parser.onChunkLoad = () => {
@@ -155,6 +156,7 @@ export default {
 		if ( Object.keys( this.citymodel ).length > 0 ) {
 
 			const parser = new CityJSONWorkerParser();
+			parser.chunkSize = 2000;
 
 			const scope = this;
 			parser.onChunkLoad = () => {
