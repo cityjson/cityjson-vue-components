@@ -11,9 +11,9 @@
     "name": "Stelios Vitalis",
     "email": "steliosvitalis@gmail.com"
   },
-  "main": "dist/cityjson-vue-components.ssr.js",
-  "module": "dist/cityjson-vue-components.esm.js",
-  "unpkg": "dist/cityjson-vue-components.min.js",
+  "main": "dist/entry.js",
+  "module": "dist/entry.js",
+  "unpkg": "dist/entry.js",
   "files": [
     "dist/*",
     "src/**/*.vue",
