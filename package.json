@@ -11,13 +11,10 @@
     "name": "Stelios Vitalis",
     "email": "steliosvitalis@gmail.com"
   },
-  "main": "dist/entry.js",
-  "module": "dist/entry.js",
-  "unpkg": "dist/entry.js",
+  "main": "src/entry.js",
+  "module": "src/entry.js",
   "files": [
-    "dist/*",
-    "src/**/*.vue",
-    "!src/lib-dev.vue"
+    "src/*"
   ],
   "scripts": {
     "build": "cross-env NODE_ENV=production rollup --config build/rollup.config.js",
