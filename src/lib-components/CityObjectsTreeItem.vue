@@ -41,7 +41,7 @@
       class="list-unstyled ml-4 mb-0"
     >
       <CityObjectsTreeItem
-        v-for="child_id in item.children"
+        v-for="child_id in allChildren"
         :key="child_id"
         class="item"
         :citymodel="citymodel"
@@ -103,8 +103,19 @@ export default {
 		},
 		isFolder: function () {
 
-			return this.item.children &&
-        this.item.children.length;
+			return ( this.item.children && this.item.children.length )
+				   || ( this.item.members && this.item.members.length );
+
+		},
+		allChildren: function () {
+
+			if ( this.item.type == "CityObjectGroup" ) {
+
+				return this.item.members;
+
+			}
+
+			return this.item.children;
 
 		},
 		iconType: function () {
