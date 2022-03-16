@@ -2,7 +2,7 @@
   <div>
     <div class="d-flex justify-content-between align-items-center">
       <div class="text-secondary">
-        <small><i :class="getIconStyle(cityobject)" /> {{ cityobject.type }}</small>
+        <small><i :class="getIconStyle(cityobject)"></i> {{ cityobject.type }}</small>
       </div>
       <div
         v-if="editable"
@@ -13,7 +13,7 @@
           :class="[ edit_mode ? 'btn-warning' : 'btn-outline-warning' ]"
           @click="edit_mode = !edit_mode"
         >
-          <i class="fas fa-pen mr-1" /> {{ edit_mode ? 'Close edit' : 'Edit' }}
+          <i class="fas fa-pen mr-1"></i> {{ edit_mode ? 'Close edit' : 'Edit' }}
         </button>
         <button
           type="button"
@@ -21,7 +21,7 @@
           aria-label="Close"
           @click="$emit('close')"
         >
-          <span aria-hidden="true">&times;</span>
+          <span aria-hidden="true">x</span>
         </button>
       </div>
     </div>

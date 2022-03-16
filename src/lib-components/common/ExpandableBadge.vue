@@ -8,10 +8,10 @@
       class="text-decoration-none"
       :class="bootstrapTextClass"
       @click="$emit('click')"
-    ><slot /> <i
+    ><slot></slot> <i
       class="fas ml-1"
       :class="[ expanded ? 'fa-chevron-up' : 'fa-chevron-down' ]"
-    /></a>
+    ></i></a>
   </div>
 </template>
 
