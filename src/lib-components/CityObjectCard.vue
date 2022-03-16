@@ -4,7 +4,10 @@
     class="card mb-2"
     :class="{ 'border-primary' : selected }"
   >
-    <div class="card-body">
+    <div
+      class="card-body"
+      style="overflow: auto; max-height: 600px"
+    >
       <CityObjectInfo
         :citymodel="citymodel"
         :cityobject="cityobject"
