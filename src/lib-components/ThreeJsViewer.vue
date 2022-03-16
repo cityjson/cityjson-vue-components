@@ -127,6 +127,7 @@ export default {
 
 				if ( c.material ) {
 
+					c.material.uniforms.selectSurface.value = false;
 					c.material.uniforms.highlightedObjId.value = idx;
 
 				}
@@ -231,7 +232,7 @@ export default {
 
 			this.scene = new THREE.Scene();
 			this.camera = new THREE.PerspectiveCamera( 60, ratio, 0.0001, 4000 );
-			this.camera.position.set( 10, 10, 10 );
+			this.camera.position.set( 2, 2, 2 );
 			this.camera.up.set( 0, 0, 1 );
 
 			this.renderer = new THREE.WebGLRenderer( {
