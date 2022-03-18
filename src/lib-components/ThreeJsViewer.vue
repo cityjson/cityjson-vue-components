@@ -59,6 +59,14 @@ export default {
 		backgroundColor: {
 			type: Number,
 			default: 0xd9eefc
+		},
+		showSemantics: {
+			type: Boolean,
+			default: true
+		},
+		activeGeometry: {
+			type: Number,
+			default: - 1
 		}
 	},
 	data() {
@@ -129,6 +137,36 @@ export default {
 
 					c.material.uniforms.selectSurface.value = false;
 					c.material.uniforms.highlightedObjId.value = idx;
+
+				}
+
+			} );
+
+			this.renderer.render( this.scene, this.camera );
+
+		},
+		showSemantics: function ( value ) {
+
+			this.scene.traverse( c => {
+
+				if ( c.material ) {
+
+					c.material.uniforms.showSemantics.value = value;
+
+				}
+
+			} );
+
+			this.renderer.render( this.scene, this.camera );
+
+		},
+		activeGeometry: function ( geomIdx ) {
+
+			this.scene.traverse( c => {
+
+				if ( c.material ) {
+
+					c.material.uniforms.showGeometry.value = geomIdx;
 
 				}
 
