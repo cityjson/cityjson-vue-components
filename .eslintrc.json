@@ -10,6 +10,9 @@
 	],
 
 	"rules": {
-		"no-unused-vars": [ 1, { "args": "none" } ]
+		"no-unused-vars": [ 1, { "args": "none" } ],
+		"vue/html-self-closing": ["error", {
+			"normal": "never"
+		}]
 	}
 }

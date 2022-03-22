@@ -2069,9 +2069,9 @@ cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
-"cityjson-threejs-loader@git+https://github.com/cityjson/cityjson-threejs-loader.git":
+"cityjson-threejs-loader@git+https://github.com/cityjson/cityjson-threejs-loader.git#develop":
   version "0.1.0"
-  resolved "git+https://github.com/cityjson/cityjson-threejs-loader.git#a9bc8e2b3dd6637146f29ed76a3cc01631df5215"
+  resolved "git+https://github.com/cityjson/cityjson-threejs-loader.git#269222f891c17ff26413deff7ee2e8d2931f36af"
   dependencies:
     earcut "^2.2.2"
     three "^0.127.0"
