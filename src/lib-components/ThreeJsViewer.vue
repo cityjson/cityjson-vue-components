@@ -64,7 +64,7 @@ export default {
 			type: Boolean,
 			default: true
 		},
-		activeGeometry: {
+		activeLoD: {
 			type: Number,
 			default: - 1
 		}
@@ -160,13 +160,13 @@ export default {
 			this.renderer.render( this.scene, this.camera );
 
 		},
-		activeGeometry: function ( geomIdx ) {
+		activeLoD: function ( lodIdx ) {
 
 			this.scene.traverse( c => {
 
 				if ( c.material ) {
 
-					c.material.uniforms.showGeometry.value = geomIdx;
+					c.material.uniforms.showLod.value = lodIdx;
 
 				}
 
