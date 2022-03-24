@@ -56,6 +56,22 @@ export default {
 
 			}
 		},
+		surfaceColors: {
+			type: Object,
+			default: function () {
+
+				return {
+					"GroundSurface": 0x999999,
+					"WallSurface": 0xffffff,
+					"RoofSurface": 0xff0000,
+					"TrafficArea": 0x6e6e6e,
+					"AuxiliaryTrafficArea": 0x2c8200,
+					"Window": 0x0059ff,
+					"Door": 0x640000
+				};
+
+			}
+		},
 		backgroundColor: {
 			type: Number,
 			default: 0xd9eefc
@@ -106,6 +122,37 @@ export default {
 								const col = new THREE.Color();
 								col.setHex( '0x' + newColors[ objtype ].toString( 16 ) );
 								mesh.material.uniforms.objectColors.value[ idx ] = col;
+
+							}
+
+						}
+
+					}
+
+				} );
+
+				this.renderer.render( this.scene, this.camera );
+
+			},
+			deep: true
+		},
+		surfaceColors: {
+			handler: function ( newColors ) {
+
+				const scope = this;
+
+				this.scene.traverse( mesh => {
+
+					if ( mesh.material ) {
+
+						for ( const surface in newColors ) {
+
+							const idx = Object.keys( scope.parser.surfaceColors ).indexOf( surface );
+							if ( idx > - 1 ) {
+
+								const col = new THREE.Color();
+								col.setHex( '0x' + newColors[ surface ].toString( 16 ) );
+								mesh.material.uniforms.surfaceColors.value[ idx ] = col;
 
 							}
 
