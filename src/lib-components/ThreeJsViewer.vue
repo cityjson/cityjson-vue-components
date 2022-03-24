@@ -2,7 +2,7 @@
   <div
     id="viewer"
     class="col-12 px-0 h-100"
-  />
+  ></div>
 </template>
 
 <script>
@@ -64,7 +64,7 @@ export default {
 			type: Boolean,
 			default: true
 		},
-		activeLoD: {
+		activeLod: {
 			type: Number,
 			default: - 1
 		}
@@ -74,8 +74,8 @@ export default {
 		return {
 
 			camera_init: true,
-      lods: [],
-      moved: false,
+			lods: [],
+			moved: false,
 
 		};
 
@@ -119,7 +119,9 @@ export default {
 
 					scope.renderer.render( scope.scene, scope.camera );
 
-          scope.lods = parser.lods;          
+					scope.lods = parser.lods;
+
+					this.$emit( 'chunkLoaded' );
 
 				};
 
@@ -166,7 +168,7 @@ export default {
 			this.renderer.render( this.scene, this.camera );
 
 		},
-		activeLoD: function ( lodIdx ) {
+		activeLod: function ( lodIdx ) {
 
 			this.scene.traverse( c => {
 
@@ -208,7 +210,9 @@ export default {
 
 				scope.renderer.render( scope.scene, scope.camera );
 
-        scope.lods = parser.lods;
+				scope.lods = parser.lods;
+
+				this.$emit( 'chunkLoaded' );
 
 			};
 
@@ -221,33 +225,33 @@ export default {
 
 		this.renderer.render( this.scene, this.camera );
 
-    this.renderer.domElement.addEventListener( 'pointerdown', this.pointerDown, false );
-    this.renderer.domElement.addEventListener( 'pointermove', this.pointerMove, false );
+		this.renderer.domElement.addEventListener( 'pointerdown', this.pointerDown, false );
+		this.renderer.domElement.addEventListener( 'pointermove', this.pointerMove, false );
 		this.renderer.domElement.addEventListener( 'pointerup', this.pointerUp, false );
 
 		this.$emit( 'rendering', false );
 
 	},
 	methods: {
-    pointerDown() {
+		pointerDown() {
 
-      this.moved = false;
+			this.moved = false;
 
-    },
-    pointerUp( e ) {
+		},
+		pointerUp( e ) {
 
-      if ( ! this.moved ) {
+			if ( ! this.moved ) {
 
-        this.handleClick( e );
+				this.handleClick( e );
 
-      }
+			}
 
-    },
-    pointerMove() {
+		},
+		pointerMove() {
 
-      this.moved = true;
+			this.moved = true;
 
-    },
+		},
 		handleClick( e ) {
 
 			var rect = this.renderer.domElement.getBoundingClientRect();
@@ -289,7 +293,7 @@ export default {
 
 			this.scene = new THREE.Scene();
 			this.camera = new THREE.PerspectiveCamera( 60, ratio, 0.0001, 4000 );
-      this.camera.position.set( 0, - 1, 1 );
+			this.camera.position.set( 0, - 1, 1 );
 			this.camera.up.set( 0, 0, 1 );
 
 			this.renderer = new THREE.WebGLRenderer( {
@@ -353,11 +357,11 @@ export default {
 			this.scene.add( spot_light );
 
 		},
-    getLods() {
+		getLods() {
 
-      return this.lods;
+			return this.lods;
 
-    }
+		}
 	}
 };
 </script>
