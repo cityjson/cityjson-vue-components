@@ -252,6 +252,31 @@ export default {
 			this.moved = true;
 
 		},
+		getActiveIntersection( results ) {
+
+			// Filters through the results to find the first one for the active LoD
+
+			if ( this.activeLod > - 1 ) {
+
+				for ( let i = 0; i < results.length; i ++ ) {
+
+					const { face, object } = results[ i ];
+
+					const lodIdx = object.geometry.getAttribute( "lodid" ).getX( face.a );
+
+					if ( lodIdx == this.activeLod ) {
+
+						return results[ i ];
+
+					}
+
+				}
+
+			}
+
+			return results[ 0 ];
+
+		},
 		handleClick( e ) {
 
 			var rect = this.renderer.domElement.getBoundingClientRect();
@@ -272,8 +297,7 @@ export default {
 
 			}
 
-			//get the id of the first object that intersects (equals the clicked object)
-			const { face, object } = intersects[ 0 ];
+			const { face, object } = this.getActiveIntersection( intersects );
 
 			const objIds = object.geometry.getAttribute( 'objectid' );
 
