@@ -72,7 +72,11 @@ export default {
 	data() {
 
 		return {
-			camera_init: true
+
+			camera_init: true,
+      lods: [],
+      moved: false,
+
 		};
 
 	},
@@ -114,6 +118,8 @@ export default {
 				parser.onChunkLoad = () => {
 
 					scope.renderer.render( scope.scene, scope.camera );
+
+          scope.lods = parser.lods;          
 
 				};
 
@@ -202,6 +208,8 @@ export default {
 
 				scope.renderer.render( scope.scene, scope.camera );
 
+        scope.lods = parser.lods;
+
 			};
 
 			const loader = new CityJSONLoader( parser );
@@ -213,22 +221,33 @@ export default {
 
 		this.renderer.render( this.scene, this.camera );
 
-		let self = this;
-
-		this.renderer.domElement.addEventListener( 'dblclick', ev => {
-
-			if ( ev.button == 0 ) { //leftClick
-
-				self.handleClick();
-
-			}
-
-		} );
+    this.renderer.domElement.addEventListener( 'pointerdown', this.pointerDown, false );
+    this.renderer.domElement.addEventListener( 'pointermove', this.pointerMove, false );
+		this.renderer.domElement.addEventListener( 'pointerup', this.pointerUp, false );
 
 		this.$emit( 'rendering', false );
 
 	},
 	methods: {
+    pointerDown() {
+
+      this.moved = false;
+
+    },
+    pointerUp() {
+
+      if ( ! this.moved ) {
+
+        this.handleClick();
+
+      }
+
+    },
+    pointerMove() {
+
+      this.moved = true;
+
+    },
 		handleClick() {
 
 			var rect = this.renderer.domElement.getBoundingClientRect();
@@ -270,7 +289,7 @@ export default {
 
 			this.scene = new THREE.Scene();
 			this.camera = new THREE.PerspectiveCamera( 60, ratio, 0.0001, 4000 );
-			this.camera.position.set( 0, - 2, 2 );
+      this.camera.position.set( 0, - 1, 1 );
 			this.camera.up.set( 0, 0, 1 );
 
 			this.renderer = new THREE.WebGLRenderer( {
@@ -333,7 +352,12 @@ export default {
 			spot_light.position.normalize();
 			this.scene.add( spot_light );
 
-		}
+		},
+    getLods() {
+
+      return this.lods;
+
+    }
 	}
 };
 </script>
