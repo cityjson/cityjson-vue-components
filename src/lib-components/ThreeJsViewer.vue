@@ -76,6 +76,7 @@ export default {
 			camera_init: true,
 			lods: [],
 			moved: false,
+			parser: null,
 
 		};
 
@@ -89,13 +90,28 @@ export default {
 
 		},
 		objectColors: {
-			handler: function ( newVal ) {
+			handler: function ( newColors ) {
 
 				const scope = this;
 
 				this.scene.traverse( mesh => {
 
-					mesh.material.color.setHex( newVal[ scope.citymodel.CityObjects[ mesh.name ].type ] );
+					if ( mesh.material ) {
+
+						for ( const objtype in newColors ) {
+
+							const idx = Object.keys( scope.parser.objectColors ).indexOf( objtype );
+							if ( idx > - 1 ) {
+
+								const col = new THREE.Color();
+								col.setHex( '0x' + newColors[ objtype ].toString( 16 ) );
+								mesh.material.uniforms.objectColors.value[ idx ] = col;
+
+							}
+
+						}
+
+					}
 
 				} );
 
@@ -111,7 +127,9 @@ export default {
 
 				this.clearScene();
 
-				const parser = new CityJSONWorkerParser();
+				this.parser = new CityJSONWorkerParser();
+
+				const parser = this.parser;
 				parser.chunkSize = 2000;
 
 				const scope = this;
@@ -202,21 +220,21 @@ export default {
 
 		if ( Object.keys( this.citymodel ).length > 0 ) {
 
-			const parser = new CityJSONWorkerParser();
-			parser.chunkSize = 2000;
+			this.parser = new CityJSONWorkerParser();
+			this.parser.chunkSize = 2000;
 
 			const scope = this;
-			parser.onChunkLoad = () => {
+			this.parser.onChunkLoad = () => {
 
 				scope.renderer.render( scope.scene, scope.camera );
 
-				scope.lods = parser.lods;
+				scope.lods = scope.parser.lods;
 
 				this.$emit( 'chunkLoaded' );
 
 			};
 
-			const loader = new CityJSONLoader( parser );
+			const loader = new CityJSONLoader( this.parser );
 			loader.load( this.citymodel );
 
 			this.scene.add( loader.scene );
