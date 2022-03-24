@@ -234,11 +234,11 @@ export default {
       this.moved = false;
 
     },
-    pointerUp() {
+    pointerUp( e ) {
 
       if ( ! this.moved ) {
 
-        this.handleClick();
+        this.handleClick( e );
 
       }
 
@@ -248,11 +248,11 @@ export default {
       this.moved = true;
 
     },
-		handleClick() {
+		handleClick( e ) {
 
 			var rect = this.renderer.domElement.getBoundingClientRect();
-			this.mouse.x = ( ( event.clientX - rect.left ) / this.renderer.domElement.clientWidth ) * 2 - 1;
-			this.mouse.y = - ( ( event.clientY - rect.top ) / this.renderer.domElement.clientHeight ) * 2 + 1;
+			this.mouse.x = ( ( e.clientX - rect.left ) / this.renderer.domElement.clientWidth ) * 2 - 1;
+			this.mouse.y = - ( ( e.clientY - rect.top ) / this.renderer.domElement.clientHeight ) * 2 + 1;
 
 			//get cameraposition
 			this.raycaster.setFromCamera( this.mouse, this.camera );
