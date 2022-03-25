@@ -83,6 +83,10 @@ export default {
 		activeLod: {
 			type: Number,
 			default: - 1
+		},
+		cameraSpotlight: {
+			type: Boolean,
+			default: true
 		}
 	},
 	data() {
@@ -102,7 +106,7 @@ export default {
 
 			this.renderer.setClearColor( newVal );
 
-			this.renderer.render( this.scene, this.camera );
+			this.updateScene();
 
 		},
 		objectColors: {
@@ -131,7 +135,7 @@ export default {
 
 				} );
 
-				this.renderer.render( this.scene, this.camera );
+				this.updateScene();
 
 			},
 			deep: true
@@ -162,7 +166,7 @@ export default {
 
 				} );
 
-				this.renderer.render( this.scene, this.camera );
+				this.updateScene();
 
 			},
 			deep: true
@@ -215,7 +219,7 @@ export default {
 
 			} );
 
-			this.renderer.render( this.scene, this.camera );
+			this.updateScene();
 
 		},
 		showSemantics: function ( value ) {
@@ -230,7 +234,7 @@ export default {
 
 			} );
 
-			this.renderer.render( this.scene, this.camera );
+			this.updateScene();
 
 		},
 		activeLod: function ( lodIdx ) {
@@ -245,7 +249,12 @@ export default {
 
 			} );
 
-			this.renderer.render( this.scene, this.camera );
+			this.updateScene();
+
+		},
+		cameraSpotlight: function () {
+
+			this.updateScene();
 
 		}
 	},
@@ -257,6 +266,7 @@ export default {
 		this.controls = null;
 		this.raycaster = null;
 		this.mouse = null;
+		this.spotLight = null;
 
 	},
 	mounted() {
@@ -288,7 +298,7 @@ export default {
 
 		}
 
-		this.renderer.render( this.scene, this.camera );
+		this.updateScene();
 
 		this.renderer.domElement.addEventListener( 'pointerdown', this.pointerDown, false );
 		this.renderer.domElement.addEventListener( 'pointermove', this.pointerMove, false );
@@ -298,6 +308,17 @@ export default {
 
 	},
 	methods: {
+		updateScene() {
+
+			if ( this.cameraSpotlight ) {
+
+				this.spotLight.position.copy( this.camera.position );
+
+			}
+
+			this.renderer.render( this.scene, this.camera );
+
+		},
 		pointerDown() {
 
 			this.moved = false;
@@ -403,23 +424,23 @@ export default {
 
 			//add AmbientLight (light that is only there that there's a minimum of light and you can see color)
 			//kind of the natural daylight
-			var am_light = new THREE.AmbientLight( 0xFFFFFF, 0.7 ); // soft white light
+			var am_light = new THREE.AmbientLight( 0x666666, 0.7 ); // soft white light
 			this.scene.add( am_light );
 
 			// Add directional light
-			var spot_light = new THREE.SpotLight( 0xDDDDDD );
-			spot_light.position.set( 84616, - 1, 447422 );
-			spot_light.target = this.scene;
-			spot_light.castShadow = true;
-			spot_light.intensity = 0.4;
-			spot_light.position.normalize();
-			this.scene.add( spot_light );
+			this.spotLight = new THREE.SpotLight( 0xDDDDDD );
+			this.spotLight.position.set( 1, 2, 3 );
+			this.spotLight.target = this.scene;
+			// this.spotLight.castShadow = true;
+			// spot_light.intensity = 0.4;
+			// spot_light.position.normalize();
+			this.scene.add( this.spotLight );
 
 			//render & orbit controls
 			this.controls = new OrbitControls( this.camera, this.renderer.domElement );
 			this.controls.addEventListener( 'change', function () {
 
-				self.renderer.render( self.scene, self.camera );
+				self.updateScene();
 
 			} );
 			this.controls.target.set( 0, 0, 0 );
