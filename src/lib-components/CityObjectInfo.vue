@@ -215,6 +215,13 @@ export default {
 		surface: function () {
 
 			const geometry = this.cityobject.geometry[ this.geometryId ];
+
+			if ( geometry === undefined ) {
+
+				return {};
+
+			}
+
 			const geomType = geometry.type;
 
 			if ( geometry.semantics ) {
