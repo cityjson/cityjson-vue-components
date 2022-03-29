@@ -95,7 +95,10 @@ export default {
 
 			camera_init: true,
 			lods: [],
-			moved: false,
+			previousPos: {
+				x: - 1,
+				y: - 1
+			},
 			parser: null,
 
 		};
@@ -319,23 +322,19 @@ export default {
 			this.renderer.render( this.scene, this.camera );
 
 		},
-		pointerDown() {
+		pointerDown( e ) {
 
-			this.moved = false;
+			this.previousPos.x = e.clientX;
+			this.previousPos.y = e.clientY;
 
 		},
 		pointerUp( e ) {
 
-			if ( ! this.moved ) {
+			if ( this.previousPos.x == e.clientX && this.previousPos.y == e.clientY ) {
 
 				this.handleClick( e );
 
 			}
-
-		},
-		pointerMove() {
-
-			this.moved = true;
 
 		},
 		getActiveIntersection( results ) {
