@@ -101,6 +101,32 @@
           </tr>
         </tbody>
       </table>
+      <div v-if="Object.keys(surface).length > 0">
+        <hr>
+        <p class="h5">
+          Active surface
+        </p>
+        <table
+          class="table table-striped table-borderless overflow-auto"
+        >
+          <tbody>
+            <tr
+              v-for="(value, key) in surface"
+              :key="key"
+            >
+              <th
+                scope="row"
+                class="py-1"
+              >
+                <small class="font-weight-bold">{{ key }}</small>
+              </th>
+              <td class="py-1">
+                <small>{{ value }}</small>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div v-show="edit_mode == false && is_mode(2)">
         <ul class="list-unstyled">
           <li
@@ -129,12 +155,6 @@
             <i class="fas fa-save mr-1"></i> Save
           </button>
         </div>
-      </div>
-    </div>
-    <div v-if="geometryId > - 1">
-      {{ cityobject.geometry[ geometryId ].type }} - {{ cityobject.geometry[ geometryId ].lod }}
-      <div v-if="boundaryId > - 1">
-        {{ surface.type }}
       </div>
     </div>
   </div>
@@ -215,7 +235,7 @@ export default {
 
 						const idx = geometry.semantics.values[ i ][ this.boundaryId - boundaryCount ];
 
-						if ( idx ) {
+						if ( idx != undefined ) {
 
 							return geometry.semantics.surfaces[ idx ];
 
@@ -229,11 +249,13 @@ export default {
 
 				} else if ( geomType == "MultiSurface" || geomType == "CompositeSurface" ) {
 
-					const idx = geometry.semantics.values[ this.boundaryId ];
+					const surfaceIdx = geometry.semantics.values[ this.boundaryId ];
 
-					if ( idx ) {
+					console.log( surfaceIdx );
 
-						return geometry.semantics.surfaces[ idx ];
+					if ( surfaceIdx != undefined ) {
+
+						return geometry.semantics.surfaces[ surfaceIdx ];
 
 					}
 

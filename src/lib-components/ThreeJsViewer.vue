@@ -26,6 +26,18 @@ export default {
 			type: String,
 			default: null
 		},
+		selectedGeomIdx: {
+			type: Number,
+			default: - 1,
+		},
+		selectedBoundaryIdx: {
+			type: Number,
+			default: - 1
+		},
+		highlightSelectedSurface: {
+			type: Boolean,
+			default: false
+		},
 		objectColors: {
 			type: Object,
 			default: function () {
@@ -207,16 +219,28 @@ export default {
 			},
 			deep: true
 		},
-		selectedObjid: function ( newId ) {
+		selectedObjid: function () {
 
-			const idx = Object.keys( this.citymodel.CityObjects ).indexOf( newId );
+			this.updateScene();
+
+		},
+		selectedGeomIdx: function () {
+
+			this.updateScene();
+
+		},
+		selectedBoundaryIdx: function () {
+
+			this.updateScene();
+
+		},
+		highlightSelectedSurface: function () {
 
 			this.scene.traverse( c => {
 
 				if ( c.material ) {
 
-					c.material.uniforms.selectSurface.value = false;
-					c.material.uniforms.highlightedObjId.value = idx;
+					c.material.uniforms.selectSurface.value = this.highlightSelectedSurface;
 
 				}
 
@@ -318,6 +342,21 @@ export default {
 				this.spotLight.position.copy( this.camera.position );
 
 			}
+
+			const idx = Object.keys( this.citymodel.CityObjects ).indexOf( this.selectedObjid );
+
+			this.scene.traverse( c => {
+
+				if ( c.material ) {
+
+					c.material.uniforms.selectSurface.value = this.highlightSelectedSurface;
+					c.material.uniforms.highlightedObjId.value = idx;
+					c.material.uniforms.highlightedGeomId.value = this.selectedGeomIdx;
+					c.material.uniforms.highlightedBoundId.value = this.selectedBoundaryIdx;
+
+				}
+
+			} );
 
 			this.renderer.render( this.scene, this.camera );
 
