@@ -376,6 +376,15 @@ export default {
 			}
 
 		},
+		pointerMove( e ) {
+
+			if ( e.ctrlKey ) {
+
+				this.handleClick( e );
+
+			}
+
+		},
 		getActiveIntersection( results ) {
 
 			// Filters through the results to find the first one for the active LoD
