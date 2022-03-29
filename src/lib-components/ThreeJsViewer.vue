@@ -390,8 +390,12 @@ export default {
 			if ( objIds ) {
 
 				const idx = objIds.getX( face.a );
+
+				const geomId = object.geometry.getAttribute( 'geometryid' ).getX( face.a );
+				const boundId = object.geometry.getAttribute( 'boundaryid' ).getX( face.a );
+
 				const objectId = Object.keys( this.citymodel.CityObjects )[ idx ];
-				this.$emit( 'object_clicked', objectId );
+				this.$emit( 'object_clicked', [ objectId, geomId, boundId ] );
 
 			}
 

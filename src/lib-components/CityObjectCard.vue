@@ -12,10 +12,12 @@
         :citymodel="citymodel"
         :cityobject="cityobject"
         :cityobject_id="cityobject_id"
+        :geometry-id="geometryId"
+        :boundary-id="boundaryId"
         :editable="editable"
         @input="saveChanges"
         @close="$emit('close')"
-      />
+      ></CityObjectInfo>
     </div>
   </div>
 </template>
@@ -32,6 +34,14 @@ export default {
 		citymodel: Object,
 		cityobject: Object,
 		cityobject_id: String,
+		geometryId: {
+			type: Number,
+			default: - 1
+		},
+		boundaryId: {
+			type: Number,
+			default: - 1
+		},
 		selected: {
 			type: Boolean,
 			default: false

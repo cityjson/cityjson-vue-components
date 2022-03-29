@@ -42,7 +42,7 @@
           <i
             class="text-danger"
             :class="getIconStyle(getObject(parent_id), false)"
-          />
+          ></i>
         </a>
       </small>
       <small v-show="'children' in cityobject">
@@ -56,7 +56,7 @@
           <i
             class="text-success"
             :class="getIconStyle(getObject(child_id), false)"
-          />
+          ></i>
         </a>
       </small>
     </div>
@@ -75,7 +75,7 @@
         :expanded="!edit_mode && is_mode(2)"
         @click="toggle_mode(2)"
       >
-        {{ this.cityobject.geometry.length }} Geometries
+        {{ cityobject.geometry.length }} Geometries
       </expandable-badge>
     </div>
     <div v-show="expanded || edit_mode">
@@ -109,7 +109,7 @@
           >
             <div class="d-flex flex-inline align-items-center">
               <span class="pr-1">{{ geom.type }}</span>
-              <geometry-badge :geometry="geom" />
+              <geometry-badge :geometry="geom"></geometry-badge>
             </div>
           </li>
         </ul>
@@ -119,16 +119,22 @@
           id="json_data"
           v-model="jsonString"
           class="form-control"
-        />
+        ></textarea>
         <div class="d-flex justify-content-end mt-2">
           <button
             type="button"
             class="btn btn-success btn-sm"
             @click="saveChanges"
           >
-            <i class="fas fa-save mr-1" /> Save
+            <i class="fas fa-save mr-1"></i> Save
           </button>
         </div>
+      </div>
+    </div>
+    <div v-if="geometryId > - 1">
+      {{ cityobject.geometry[ geometryId ].type }} - {{ cityobject.geometry[ geometryId ].lod }}
+      <div v-if="boundaryId > - 1">
+        {{ surface.type }}
       </div>
     </div>
   </div>
@@ -150,6 +156,14 @@ export default {
 		citymodel: Object,
 		cityobject: Object,
 		cityobject_id: String,
+		geometryId: {
+			type: Number,
+			default: - 1
+		},
+		boundaryId: {
+			type: Number,
+			default: - 1
+		},
 		selected: {
 			type: Boolean,
 			default: false,
@@ -176,6 +190,74 @@ export default {
 		hasAttributes: function () {
 
 			return "attributes" in this.cityobject && this.attributesCount > 0;
+
+		},
+		surface: function () {
+
+			const geometry = this.cityobject.geometry[ this.geometryId ];
+			const geomType = geometry.type;
+
+			if ( geometry.semantics ) {
+
+				if ( geomType == "Solid" ) {
+
+					const shells = geometry.boundaries;
+
+					let boundaryCount = 0;
+
+					for ( let i = 0; i < shells.length; i ++ ) {
+
+						if ( this.boundaryId > boundaryCount + shells[ i ].length ) {
+
+							continue;
+
+						}
+
+						const idx = geometry.semantics.values[ i ][ this.boundaryId - boundaryCount ];
+
+						if ( idx ) {
+
+							return geometry.semantics.surfaces[ idx ];
+
+						} else {
+
+							return {};
+
+						}
+
+					}
+
+				} else if ( geomType == "MultiSurface" || geomType == "CompositeSurface" ) {
+
+					const idx = geometry.semantics.values[ this.boundaryId ];
+
+					if ( idx ) {
+
+						return geometry.semantics.surfaces[ idx ];
+
+					}
+
+				} else if ( geomType == "MultiSolid" || geomType == "CompositeSolid" ) {
+
+					const solids = geometry.boundaries;
+
+					for ( let i = 0; i < solids.length; i ++ ) {
+
+						for ( let j = 0; j < solids[ i ].length; j ++ ) {
+
+							const semantics = geometry.semantics ? geometry.semantics.values[ i ][ j ] : [];
+
+							this.parseShell( solids[ i ][ j ], objectId, geomIdx, semantics, semanticSurfaces );
+
+						}
+
+					}
+
+				}
+
+			}
+
+			return {};
 
 		},
 		hasGeometries: function () {
