@@ -38,6 +38,10 @@ export default {
 			type: Boolean,
 			default: false
 		},
+		selectionColor: {
+			type: Number,
+			default: 0xFFC107
+		},
 		objectColors: {
 			type: Object,
 			default: function () {
@@ -187,34 +191,13 @@ export default {
 			deep: true
 		},
 		citymodel: {
-			handler: function ( newVal ) {
-
-				this.$emit( 'rendering', true );
+			handler: function ( newCitymodel ) {
 
 				this.clearScene();
 
-				this.parser = new CityJSONWorkerParser();
+				this.loadCitymodel( newCitymodel );
 
-				const parser = this.parser;
-				parser.chunkSize = 2000;
-
-				const scope = this;
-				parser.onChunkLoad = () => {
-
-					scope.renderer.render( scope.scene, scope.camera );
-
-					scope.lods = parser.lods;
-
-					this.$emit( 'chunkLoaded' );
-
-				};
-
-				const loader = new CityJSONLoader( parser );
-				loader.load( this.citymodel );
-
-				this.scene.add( loader.scene );
-
-				this.$emit( 'rendering', false );
+				this.updateScene();
 
 			},
 			deep: true
@@ -298,32 +281,9 @@ export default {
 	},
 	mounted() {
 
-		this.$emit( 'rendering', true );
-
 		this.initScene();
 
-		if ( Object.keys( this.citymodel ).length > 0 ) {
-
-			this.parser = new CityJSONWorkerParser();
-			this.parser.chunkSize = 2000;
-
-			const scope = this;
-			this.parser.onChunkLoad = () => {
-
-				scope.renderer.render( scope.scene, scope.camera );
-
-				scope.lods = scope.parser.lods;
-
-				this.$emit( 'chunkLoaded' );
-
-			};
-
-			const loader = new CityJSONLoader( this.parser );
-			loader.load( this.citymodel );
-
-			this.scene.add( loader.scene );
-
-		}
+		this.loadCitymodel( this.citymodel );
 
 		this.updateScene();
 
@@ -331,10 +291,42 @@ export default {
 		this.renderer.domElement.addEventListener( 'pointermove', this.pointerMove, false );
 		this.renderer.domElement.addEventListener( 'pointerup', this.pointerUp, false );
 
-		this.$emit( 'rendering', false );
-
 	},
 	methods: {
+		loadCitymodel( citymodel ) {
+
+			this.$emit( 'rendering', true );
+
+			if ( Object.keys( citymodel ).length > 0 ) {
+
+				this.parser = new CityJSONWorkerParser();
+				this.parser.chunkSize = 2000;
+
+				const scope = this;
+				this.parser.onChunkLoad = () => {
+
+					scope.renderer.render( scope.scene, scope.camera );
+
+					scope.lods = scope.parser.lods;
+
+					if ( ! scope.parser.loading ) {
+
+						this.$emit( 'rendering', false );
+
+					}
+
+					this.$emit( 'chunkLoaded' );
+
+				};
+
+				const loader = new CityJSONLoader( this.parser );
+				loader.load( citymodel );
+
+				this.scene.add( loader.scene );
+
+			}
+
+		},
 		updateScene() {
 
 			if ( this.cameraSpotlight ) {
