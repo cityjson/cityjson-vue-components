@@ -40,7 +40,7 @@ export default {
 		},
 		selectionColor: {
 			type: Number,
-			default: 0xFFC107
+			default: 0xffc107
 		},
 		objectColors: {
 			type: Object,
@@ -129,66 +129,28 @@ export default {
 
 		},
 		objectColors: {
-			handler: function ( newColors ) {
+			handler: function () {
 
-				const scope = this;
-
-				this.scene.traverse( mesh => {
-
-					if ( mesh.material ) {
-
-						for ( const objtype in newColors ) {
-
-							const idx = Object.keys( scope.parser.objectColors ).indexOf( objtype );
-							if ( idx > - 1 ) {
-
-								const col = new THREE.Color();
-								col.setHex( '0x' + newColors[ objtype ].toString( 16 ) );
-								mesh.material.uniforms.objectColors.value[ idx ] = col;
-
-							}
-
-						}
-
-					}
-
-				} );
-
+				this.refreshColors();
 				this.updateScene();
 
 			},
 			deep: true
 		},
 		surfaceColors: {
-			handler: function ( newColors ) {
+			handler: function () {
 
-				const scope = this;
-
-				this.scene.traverse( mesh => {
-
-					if ( mesh.material ) {
-
-						for ( const surface in newColors ) {
-
-							const idx = Object.keys( scope.parser.surfaceColors ).indexOf( surface );
-							if ( idx > - 1 ) {
-
-								const col = new THREE.Color();
-								col.setHex( '0x' + newColors[ surface ].toString( 16 ) );
-								mesh.material.uniforms.surfaceColors.value[ idx ] = col;
-
-							}
-
-						}
-
-					}
-
-				} );
-
+				this.refreshColors();
 				this.updateScene();
 
 			},
 			deep: true
+		},
+		selectionColor: function () {
+
+			this.refreshColors();
+			this.updateScene();
+
 		},
 		citymodel: {
 			handler: function ( newCitymodel ) {
@@ -305,17 +267,19 @@ export default {
 				const scope = this;
 				this.parser.onChunkLoad = () => {
 
-					scope.renderer.render( scope.scene, scope.camera );
-
 					scope.lods = scope.parser.lods;
 
 					if ( ! scope.parser.loading ) {
 
-						this.$emit( 'rendering', false );
+						scope.$emit( 'rendering', false );
 
 					}
 
-					this.$emit( 'chunkLoaded' );
+					scope.refreshColors();
+
+					scope.updateScene();
+
+					scope.$emit( 'chunkLoaded' );
 
 				};
 
@@ -351,6 +315,47 @@ export default {
 			} );
 
 			this.renderer.render( this.scene, this.camera );
+
+		},
+		refreshColors() {
+
+			const scope = this;
+
+			this.scene.traverse( mesh => {
+
+				if ( mesh.material ) {
+
+					for ( const objtype in scope.objectColors ) {
+
+						const idx = Object.keys( scope.parser.objectColors ).indexOf( objtype );
+						if ( idx > - 1 ) {
+
+							const col = new THREE.Color();
+							col.setHex( '0x' + this.objectColors[ objtype ].toString( 16 ) );
+							mesh.material.uniforms.objectColors.value[ idx ] = col;
+
+						}
+
+					}
+
+					for ( const surface in scope.surfaceColors ) {
+
+						const idx = Object.keys( scope.parser.surfaceColors ).indexOf( surface );
+						if ( idx > - 1 ) {
+
+							const col = new THREE.Color();
+							col.setHex( '0x' + scope.surfaceColors[ surface ].toString( 16 ) );
+							mesh.material.uniforms.surfaceColors.value[ idx ] = col;
+
+						}
+
+					}
+
+					mesh.material.uniforms.highlightColor.value.setHex( '0x' + scope.selectionColor.toString( 16 ) );
+
+				}
+
+			} );
 
 		},
 		pointerDown( e ) {
