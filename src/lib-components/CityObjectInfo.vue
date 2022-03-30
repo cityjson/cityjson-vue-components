@@ -80,52 +80,53 @@
     </div>
     <div v-show="expanded || edit_mode">
       <hr>
-      <table
-        v-show="edit_mode == false && is_mode(1)"
-        class="table table-striped table-borderless overflow-auto"
-      >
-        <tbody>
-          <tr
-            v-for="(value, key) in cityobject.attributes"
-            :key="key"
-          >
-            <th
-              scope="row"
-              class="py-1"
-            >
-              <small class="font-weight-bold">{{ key }}</small>
-            </th>
-            <td class="py-1">
-              <small>{{ value }}</small>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div v-if="Object.keys(surface).length > 0">
-        <hr>
-        <p class="h5">
-          Active surface
-        </p>
-        <table
-          class="table table-striped table-borderless overflow-auto"
-        >
-          <tbody>
-            <tr
-              v-for="(value, key) in surface"
-              :key="key"
-            >
-              <th
-                scope="row"
-                class="py-1"
+      <div v-show="edit_mode == false && is_mode(1)">
+        <div v-show="cityobjectAttributesCount > 0">
+          <table class="table table-striped table-borderless overflow-auto">
+            <tbody>
+              <tr
+                v-for="(value, key) in cityobject.attributes"
+                :key="key"
               >
-                <small class="font-weight-bold">{{ key }}</small>
-              </th>
-              <td class="py-1">
-                <small>{{ value }}</small>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                <th
+                  scope="row"
+                  class="py-1"
+                >
+                  <small class="font-weight-bold">{{ key }}</small>
+                </th>
+                <td class="py-1">
+                  <small>{{ value }}</small>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <hr>
+        </div>
+        <div v-if="Object.keys(surface).length > 0">
+          <p class="h5">
+            Active surface
+          </p>
+          <table
+            class="table table-striped table-borderless overflow-auto"
+          >
+            <tbody>
+              <tr
+                v-for="(value, key) in surface"
+                :key="key"
+              >
+                <th
+                  scope="row"
+                  class="py-1"
+                >
+                  <small class="font-weight-bold">{{ key }}</small>
+                </th>
+                <td class="py-1">
+                  <small>{{ value }}</small>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
       <div v-show="edit_mode == false && is_mode(2)">
         <ul class="list-unstyled">
@@ -205,12 +206,24 @@ export default {
 	computed: {
 		attributesCount: function () {
 
-			return Object.keys( this.cityobject.attributes ).length;
+			return this.cityobjectAttributesCount + Object.keys( this.surface ).length;
+
+		},
+		cityobjectAttributesCount: function () {
+
+			if ( "attributes" in this.cityobject ) {
+
+				return Object.keys( this.cityobject.attributes ).length;
+
+			}
+
+			return 0;
 
 		},
 		hasAttributes: function () {
 
-			return "attributes" in this.cityobject && this.attributesCount > 0;
+			return ( "attributes" in this.cityobject && this.attributesCount > 0 )
+				     || Object.keys( this.surface ).length > 0;
 
 		},
 		surface: function () {
