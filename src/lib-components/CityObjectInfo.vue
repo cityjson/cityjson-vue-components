@@ -1,11 +1,29 @@
 <template>
   <div>
     <div class="d-flex justify-content-between align-items-center">
-      <div class="text-secondary"><small><i :class="getIconStyle(cityobject)"></i> {{ cityobject.type }}</small></div>
-      <div class="col-auto p-0" v-if="editable">
-        <button class="btn btn-sm" :class="[ edit_mode ? 'btn-warning' : 'btn-outline-warning' ]" @click="edit_mode = !edit_mode"><i class="fas fa-pen mr-1"></i> {{ edit_mode ? 'Close edit' : 'Edit' }}</button>
-        <button type="button" class="close ml-2" aria-label="Close" @click="$emit('close')">
-          <span aria-hidden="true">&times;</span>
+      <div class="text-secondary">
+        <small><i :class="getIconStyle(cityobject)"></i>
+          {{ cityobject.type }}</small>
+      </div>
+      <div
+        v-if="editable"
+        class="col-auto p-0"
+      >
+        <button
+          class="btn btn-sm"
+          :class="[edit_mode ? 'btn-warning' : 'btn-outline-warning']"
+          @click="edit_mode = !edit_mode"
+        >
+          <i class="fas fa-pen mr-1"></i>
+          {{ edit_mode ? "Close edit" : "Edit" }}
+        </button>
+        <button
+          type="button"
+          class="close ml-2"
+          aria-label="Close"
+          @click="$emit('close')"
+        >
+          <span aria-hidden="true"><i class="fas fa-times small"></i></span>
         </button>
       </div>
     </div>
@@ -19,8 +37,12 @@
           v-for="parent_id in cityobject.parents"
           :key="parent_id"
           :href="'#' + parent_id"
-          :title="parent_id">
-            <i class="text-danger" :class="getIconStyle(getObject(parent_id), false)"></i>
+          :title="parent_id"
+        >
+          <i
+            class="text-danger"
+            :class="getIconStyle(getObject(parent_id), false)"
+          ></i>
         </a>
       </small>
       <small v-show="'children' in cityobject">
@@ -29,46 +51,110 @@
           v-for="child_id in cityobject.children"
           :key="child_id"
           :href="'#' + child_id"
-          :title="child_id">
-            <i class="text-success" :class="getIconStyle(getObject(child_id), false)"></i>
+          :title="child_id"
+        >
+          <i
+            class="text-success"
+            :class="getIconStyle(getObject(child_id), false)"
+          ></i>
         </a>
       </small>
     </div>
     <div class="d-flex mt-2">
       <expandable-badge
         v-if="hasAttributes"
-        @click="toggle_mode(1)"
         color="info"
-        :expanded="!edit_mode && is_mode(1)">
-          {{ attributesCount }} Attributes
+        :expanded="!edit_mode && is_mode(1)"
+        @click="toggle_mode(1)"
+      >
+        {{ attributesCount }} Attributes
       </expandable-badge>
-            <expandable-badge
+      <expandable-badge
         v-if="hasGeometries"
-        @click="toggle_mode(2)"
         color="danger"
-        :expanded="!edit_mode && is_mode(2)">
-          {{ this.cityobject.geometry.length }} Geometries
+        :expanded="!edit_mode && is_mode(2)"
+        @click="toggle_mode(2)"
+      >
+        {{ cityobject.geometry.length }} Geometries
       </expandable-badge>
     </div>
     <div v-show="expanded || edit_mode">
       <hr>
-      <table class="table table-striped table-borderless overflow-auto" v-show="edit_mode == false && is_mode(1)" >
-        <tbody>
-          <tr v-for="(value, key) in cityobject.attributes" :key="key">
-            <th scope="row" class="py-1"><small class="font-weight-bold">{{ key }}</small></th>
-            <td class="py-1"><small>{{ value }}</small></td>
-          </tr>
-        </tbody>
-      </table>
+      <div v-show="edit_mode == false && is_mode(1)">
+        <div v-show="cityobjectAttributesCount > 0">
+          <table class="table table-striped table-borderless overflow-auto">
+            <tbody>
+              <tr
+                v-for="(value, key) in cityobject.attributes"
+                :key="key"
+              >
+                <th
+                  scope="row"
+                  class="py-1"
+                >
+                  <small class="font-weight-bold">{{ key }}</small>
+                </th>
+                <td class="py-1">
+                  <small>{{ value }}</small>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <hr>
+        </div>
+        <div v-if="Object.keys(surface).length > 0">
+          <p class="h5">
+            Active surface
+          </p>
+          <table
+            class="table table-striped table-borderless overflow-auto"
+          >
+            <tbody>
+              <tr
+                v-for="(value, key) in surface"
+                :key="key"
+              >
+                <th
+                  scope="row"
+                  class="py-1"
+                >
+                  <small class="font-weight-bold">{{ key }}</small>
+                </th>
+                <td class="py-1">
+                  <small>{{ value }}</small>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
       <div v-show="edit_mode == false && is_mode(2)">
-        <ul>
-          <li v-for="(geom, i) in cityobject.geometry" :key="i">{{ geom.type }}</li>
+        <ul class="list-unstyled">
+          <li
+            v-for="(geom, i) in cityobject.geometry"
+            :key="i"
+          >
+            <div class="d-flex flex-inline align-items-center">
+              <span class="pr-1">{{ geom.type }}</span>
+              <geometry-badge :geometry="geom"></geometry-badge>
+            </div>
+          </li>
         </ul>
       </div>
       <div v-show="edit_mode">
-        <textarea id="json_data" class="form-control" v-model="jsonString"></textarea>
+        <textarea
+          id="json_data"
+          v-model="jsonString"
+          class="form-control"
+        ></textarea>
         <div class="d-flex justify-content-end mt-2">
-          <button type="button" class="btn btn-success btn-sm" @click="saveChanges"><i class="fas fa-save mr-1"></i> Save</button>
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            @click="saveChanges"
+          >
+            <i class="fas fa-save mr-1"></i> Save
+          </button>
         </div>
       </div>
     </div>
@@ -76,123 +162,211 @@
 </template>
 
 <script>
-import $ from 'jquery'
+import $ from "jquery";
+import { getIconStyle } from '../helpers/icons';
 
-import ExpandableBadge from './common/ExpandableBadge.vue'
+import ExpandableBadge from "./common/ExpandableBadge.vue";
+import GeometryBadge from "./common/GeometryBadge.vue";
 
 export default {
-  name: "CityObjectInfo",
-  components: {
-    ExpandableBadge
-  },
-  props: {
-    citymodel: Object,
-    cityobject: Object,
-    cityobject_id: String,
-    selected: {
-      type: Boolean,
-      default: false
-    },
-    editable: {
-      type: Boolean,
-      default: false,
-    }
-  },
-  data() {
-    return {
-      edit_mode: false,
-      expanded: 0
-    }
-  },
-  computed: {
-    attributesCount: function() {
-      return Object.keys(this.cityobject.attributes).length;
-    },
-    hasAttributes: function() {
-      return "attributes" in this.cityobject && this.attributesCount > 0;
-    },
-    hasGeometries: function() {
-      return this.cityobject.geometry;
-    },
-    iconType: function() {
-      return this.getIconStyle(this.cityobject);
-    },
-    jsonString: {
-      get: function() {
-        return JSON.stringify(this.cityobject, undefined, 4);
-      }
-    }
-  },
-  methods: {
-    toggle_mode(mode) {
-      if (this.expanded == mode)
-      {
-        this.expanded = 0;
-      }
-      else
-      {
-        this.expanded = mode;
-      }
-    },
-    is_mode(mode) {
-      return this.expanded == mode;
-    },
-    getObject(objid) {
-      if (this.citymodel)
-      {
-        return this.citymodel.CityObjects[objid];
-      }
-      else
-      {
-        return {};
-      }
-    },
-    getIconStyle(cityobj, with_colour=true) {
-      var type_icons = {
-        "Building": ['fas', 'fa-building', 'text-danger', 'mr-1'],
-        "BuildingPart": ['far', 'fa-building', 'text-danger', 'mr-1'],
-        "BuildingInstallation": ['fas', 'fa-city', 'text-danger', 'mr-1'],
-        "Bridge": ['fas', 'fa-archway', 'text-dark', 'mr-1'],
-        "BridgePart": ['fas', 'fa-archway', 'text-secondary', 'mr-1'],
-        "BridgeInstallation": ['fas', 'fa-archway', 'text-primary', 'mr-1'],
-        "BridgeConstructionElement": ['fas', 'fa-archway', 'text-warning', 'mr-1'],
-        "CityObjectGroup": ['fas', 'fa-cubes', 'text-dark', 'mr-1'],
-        "CityFurniture": ['fas', 'fa-store-alt', 'text-danger', 'mr-1'],
-        "GenericCityObject": ['fas', 'fa-cube', 'text-danger', 'mr-1'],
-        "LandUse": ['fas', 'fa-chart-area', 'text-success', 'mr-1'],
-        "PlantCover": ['fas', 'fa-leaf', 'text-success', 'mr-1'],
-        "Railway": ['fas', 'fa-train', 'text-primary', 'mr-1'],
-        "Road": ['fas', 'fa-road', 'text-dark', 'mr-1'],
-        "SolitaryVegetationObject": ['fas', 'fa-tree', 'text-success', 'mr-1'],
-        "TINRelief": ['fas', 'fa-mountain', 'text-success', 'mr-1'],
-        "TransportSquare": ['fas', 'fa-circle-notch', 'text-dark', 'mr-1'],
-        "Tunnel": ['fas', 'fa-dot-circle', 'text-dark', 'mr-1'],
-        "TunnelPart": ['fas', 'fa-dot-circle', 'text-dark', 'mr-1'],
-        "TunnelInstallation": ['fas', 'fa-dot-circle', 'text-warning', 'mr-1'],
-        "WaterBody": ['fas', 'fa-water', 'text-primary', 'mr-1']
-      };
+	name: "CityObjectInfo",
+	components: {
+		ExpandableBadge,
+		GeometryBadge,
+	},
+	props: {
+		citymodel: Object,
+		cityobject: Object,
+		cityobject_id: String,
+		geometryId: {
+			type: Number,
+			default: - 1
+		},
+		boundaryId: {
+			type: Number,
+			default: - 1
+		},
+		selected: {
+			type: Boolean,
+			default: false,
+		},
+		editable: {
+			type: Boolean,
+			default: false,
+		},
+	},
+	data() {
 
-      if (cityobj.type in type_icons)
-      {
-        var icon_style = type_icons[cityobj.type];
-        if (!with_colour)
-        {
-          icon_style.splice(2, 1);
-        } 
-        return icon_style;
-      }
-      else
-      {
-        return ['fas', 'fa-question', 'text-secondary', 'mr-1'];
-      }
-    },
-    saveChanges() {
-      var card_id = $.escapeSelector(this.cityobject_id);
-      var new_json = $(`#${card_id} #json_data`).val();
-      var new_cityobject = JSON.parse(new_json);
+		return {
+			edit_mode: false,
+			expanded: 0,
+		};
 
-      this.$emit('input', new_cityobject);
-    }
-  }
-}
+	},
+	computed: {
+		attributesCount: function () {
+
+			return this.cityobjectAttributesCount + Object.keys( this.surface ).length;
+
+		},
+		cityobjectAttributesCount: function () {
+
+			if ( "attributes" in this.cityobject ) {
+
+				return Object.keys( this.cityobject.attributes ).length;
+
+			}
+
+			return 0;
+
+		},
+		hasAttributes: function () {
+
+			return ( "attributes" in this.cityobject && this.attributesCount > 0 )
+				     || Object.keys( this.surface ).length > 0;
+
+		},
+		surface: function () {
+
+			const geometry = this.cityobject.geometry[ this.geometryId ];
+
+			if ( geometry === undefined ) {
+
+				return {};
+
+			}
+
+			const geomType = geometry.type;
+
+			if ( geometry.semantics ) {
+
+				if ( geomType == "Solid" ) {
+
+					const shells = geometry.boundaries;
+
+					let boundaryCount = 0;
+
+					for ( let i = 0; i < shells.length; i ++ ) {
+
+						if ( this.boundaryId > boundaryCount + shells[ i ].length ) {
+
+							continue;
+
+						}
+
+						const idx = geometry.semantics.values[ i ][ this.boundaryId - boundaryCount ];
+
+						if ( idx != undefined ) {
+
+							return geometry.semantics.surfaces[ idx ];
+
+						} else {
+
+							return {};
+
+						}
+
+					}
+
+				} else if ( geomType == "MultiSurface" || geomType == "CompositeSurface" ) {
+
+					const surfaceIdx = geometry.semantics.values[ this.boundaryId ];
+
+					console.log( surfaceIdx );
+
+					if ( surfaceIdx != undefined ) {
+
+						return geometry.semantics.surfaces[ surfaceIdx ];
+
+					}
+
+				} else if ( geomType == "MultiSolid" || geomType == "CompositeSolid" ) {
+
+					const solids = geometry.boundaries;
+
+					for ( let i = 0; i < solids.length; i ++ ) {
+
+						for ( let j = 0; j < solids[ i ].length; j ++ ) {
+
+							const semantics = geometry.semantics ? geometry.semantics.values[ i ][ j ] : [];
+
+							this.parseShell( solids[ i ][ j ], objectId, geomIdx, semantics, semanticSurfaces );
+
+						}
+
+					}
+
+				}
+
+			}
+
+			return {};
+
+		},
+		hasGeometries: function () {
+
+			return this.cityobject.geometry;
+
+		},
+		iconType: function () {
+
+			return getIconStyle( this.cityobject );
+
+		},
+		jsonString: {
+			get: function () {
+
+				return JSON.stringify( this.cityobject, undefined, 4 );
+
+			},
+		},
+	},
+	methods: {
+		toggle_mode( mode ) {
+
+			if ( this.expanded == mode ) {
+
+				this.expanded = 0;
+
+			} else {
+
+				this.expanded = mode;
+
+			}
+
+		},
+		is_mode( mode ) {
+
+			return this.expanded == mode;
+
+		},
+		getObject( objid ) {
+
+			if ( this.citymodel ) {
+
+				return this.citymodel.CityObjects[ objid ];
+
+			} else {
+
+				return {};
+
+			}
+
+		},
+		saveChanges() {
+
+			const card_id = $.escapeSelector( this.cityobject_id );
+			const new_json = document.querySelector( `#${card_id} #json_data` ).value;
+			const new_cityobject = JSON.parse( new_json );
+
+			this.$emit( "input", new_cityobject );
+
+		},
+		getIconStyle( cityobj, with_colours ) {
+
+			return getIconStyle( cityobj, with_colours );
+
+		}
+	},
+};
 </script>

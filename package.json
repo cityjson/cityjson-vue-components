@@ -1,6 +1,6 @@
 {
   "name": "cityjson-vue-components",
-  "version": "0.3.3",
+  "version": "0.6.0",
   "description": "A collection of Vue components for CityJSON",
   "license": "MIT",
   "repository": {
@@ -11,40 +11,42 @@
     "name": "Stelios Vitalis",
     "email": "steliosvitalis@gmail.com"
   },
-  "main": "dist/cityjson-vue-components.ssr.js",
-  "module": "dist/cityjson-vue-components.esm.js",
-  "unpkg": "dist/cityjson-vue-components.min.js",
+  "main": "src/entry.js",
+  "module": "src/entry.js",
   "files": [
-    "dist/*",
-    "src/**/*.vue",
-    "!src/lib-dev.vue"
+    "src/*"
   ],
   "scripts": {
     "build": "cross-env NODE_ENV=production rollup --config build/rollup.config.js",
     "build:ssr": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format cjs",
     "build:es": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format es",
-    "build:unpkg": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format iife"
+    "build:unpkg": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format iife",
+    "lint": "vue-cli-service lint",
+    "test": "concurrently \"parcel watch examples/ComboTest.html --out-dir ./examples/dev-bundle --public-url .\" \"static-server\""
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^5.11.2",
-    "bootstrap": "^4.3.1",
-    "earcut": "^2.2.1",
-    "jquery": "^3.4.1",
+    "@fortawesome/fontawesome-free": "^5.15.3",
+    "bootstrap": "^4.6.0",
+    "cityjson-threejs-loader": "git+https://github.com/cityjson/cityjson-threejs-loader.git#develop",
+    "earcut": "^2.2.2",
+    "jquery": "^3.6.0",
     "lodash": "^4.17.15",
-    "popper": "^1.0.1",
-    "three": "^0.109.0",
-    "three-orbitcontrols": "^2.108.1"
+    "popper.js": "^1.16.1",
+    "three": "^0.127.0"
   },
   "devDependencies": {
-    "cross-env": "^5.2.0",
-    "minimist": "^1.2.0",
-    "rollup": "^1.12.1",
-    "rollup-plugin-buble": "^0.19.6",
-    "rollup-plugin-commonjs": "^10.0.0",
-    "rollup-plugin-replace": "^2.2.0",
-    "rollup-plugin-terser": "^4.0.4",
-    "rollup-plugin-vue": "^5.0.0",
-    "vue": "^2.6.10",
-    "vue-template-compiler": "^2.6.10"
+    "@vue/component-compiler-utils": "^3.2.0",
+    "babel-eslint": "^10.1.0",
+    "concurrently": "^6.0.2",
+    "eslint": "^7.18.0",
+    "eslint-config-mdcs": "^5.0.0",
+    "eslint-plugin-vue": "^7.4.1",
+    "jest": "^26.6.3",
+    "jest-cli": "^26.6.3",
+    "parcel-bundler": "^1.12.5",
+    "static-server": "^2.2.1",
+    "vue": "^2.6.12",
+    "vue-hot-reload-api": "^2.3.4",
+    "vue-template-compiler": "^2.6.12"
   }
 }
