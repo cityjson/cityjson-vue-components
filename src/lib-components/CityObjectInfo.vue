@@ -228,6 +228,12 @@ export default {
 		},
 		surface: function () {
 
+			if ( this.cityobject.geometry === undefined ) {
+
+				return {};
+
+			}
+
 			const geometry = this.cityobject.geometry[ this.geometryId ];
 
 			if ( geometry === undefined ) {
