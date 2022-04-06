@@ -183,9 +183,9 @@ export default {
 
 			this.scene.traverse( c => {
 
-				if ( c.material ) {
+				if ( c.material && c.material.isCityObjectsMaterial ) {
 
-					c.material.uniforms.selectSurface.value = this.highlightSelectedSurface;
+					c.material.selectSurface = this.highlightSelectedSurface;
 
 				}
 
@@ -198,9 +198,9 @@ export default {
 
 			this.scene.traverse( c => {
 
-				if ( c.material ) {
+				if ( c.material && c.material.isCityObjectsMaterial ) {
 
-					c.material.uniforms.showSemantics.value = value;
+					c.material.showSemantics = value;
 
 				}
 
@@ -213,9 +213,9 @@ export default {
 
 			this.scene.traverse( c => {
 
-				if ( c.material ) {
+				if ( c.material && c.material.isCityObjectsMaterial ) {
 
-					c.material.uniforms.showLod.value = lodIdx;
+					c.material.showLod = lodIdx;
 
 				}
 
@@ -269,11 +269,8 @@ export default {
 
 					scope.lods = scope.parser.lods;
 
-					if ( ! scope.parser.loading ) {
-
-						scope.$emit( 'rendering', false );
-
-					}
+					this.$emit( 'objectColorsChanged', scope.parser.objectColors );
+					this.$emit( 'surfaceColorsChanged', scope.parser.surfaceColors );
 
 					scope.refreshColors();
 
@@ -283,12 +280,61 @@ export default {
 
 				};
 
+				this.parser.onComplete = () => {
+
+					scope.$emit( 'rendering', false );
+
+				};
+
 				const loader = new CityJSONLoader( this.parser );
 				loader.load( citymodel );
+
+				const bbox = loader.boundingBox.clone();
+				bbox.applyMatrix4( loader.matrix );
+
+				this.fitCameraToSelection( this.camera, this.controls, bbox );
 
 				this.scene.add( loader.scene );
 
 			}
+
+		},
+		fitCameraToSelection( camera, controls, box, fitOffset = 1.2 ) {
+
+			// From https://discourse.threejs.org/t/camera-zoom-to-fit-object/936/24
+
+			// const box.makeEmpty();
+			// for ( const object of selection ) {
+
+			//   box.expandByObject( object );
+
+			// }
+			const size = new THREE.Vector3();
+			const center = new THREE.Vector3();
+
+			box.getSize( size );
+			box.getCenter( center );
+
+			const maxSize = Math.max( size.x, size.y, size.z );
+			const fitHeightDistance = maxSize / ( 2 * Math.atan( Math.PI * camera.fov / 360 ) );
+			const fitWidthDistance = fitHeightDistance / camera.aspect;
+			const distance = fitOffset * Math.max( fitHeightDistance, fitWidthDistance );
+
+			const direction = controls.target.clone()
+				.sub( camera.position )
+				.normalize()
+				.multiplyScalar( distance );
+
+			controls.maxDistance = distance * 10;
+			controls.target.copy( center );
+
+			camera.near = distance / 100;
+			camera.far = distance * 100;
+			camera.updateProjectionMatrix();
+
+			camera.position.copy( controls.target ).sub( direction );
+
+			controls.update();
 
 		},
 		updateScene() {
@@ -303,12 +349,17 @@ export default {
 
 			this.scene.traverse( c => {
 
-				if ( c.material ) {
+				if ( c.material && c.material.isCityObjectsMaterial ) {
 
-					c.material.uniforms.selectSurface.value = this.highlightSelectedSurface;
-					c.material.uniforms.highlightedObjId.value = idx;
-					c.material.uniforms.highlightedGeomId.value = this.selectedGeomIdx;
-					c.material.uniforms.highlightedBoundId.value = this.selectedBoundaryIdx;
+					c.material.selectSurface = this.highlightSelectedSurface;
+
+					c.material.highlightedObject = {
+
+						objectIndex: idx,
+						geometryIndex: this.selectedGeomIdx,
+						boundaryIndex: this.selectedBoundaryIdx
+
+					};
 
 				}
 
@@ -323,35 +374,12 @@ export default {
 
 			this.scene.traverse( mesh => {
 
-				if ( mesh.material ) {
+				if ( mesh.material && mesh.material.isCityObjectsMaterial ) {
 
-					for ( const objtype in scope.objectColors ) {
+					mesh.material.objectColors = this.objectColors;
+					mesh.material.surfaceColors = this.surfaceColors;
 
-						const idx = Object.keys( scope.parser.objectColors ).indexOf( objtype );
-						if ( idx > - 1 ) {
-
-							const col = new THREE.Color();
-							col.setHex( '0x' + this.objectColors[ objtype ].toString( 16 ) );
-							mesh.material.uniforms.objectColors.value[ idx ] = col;
-
-						}
-
-					}
-
-					for ( const surface in scope.surfaceColors ) {
-
-						const idx = Object.keys( scope.parser.surfaceColors ).indexOf( surface );
-						if ( idx > - 1 ) {
-
-							const col = new THREE.Color();
-							col.setHex( '0x' + scope.surfaceColors[ surface ].toString( 16 ) );
-							mesh.material.uniforms.surfaceColors.value[ idx ] = col;
-
-						}
-
-					}
-
-					mesh.material.uniforms.highlightColor.value.setHex( '0x' + scope.selectionColor.toString( 16 ) );
+					mesh.material.highlightColor = scope.selectionColor;
 
 				}
 
@@ -476,7 +504,7 @@ export default {
 			this.scene.add( am_light );
 
 			// Add directional light
-			this.spotLight = new THREE.SpotLight( 0xDDDDDD );
+			this.spotLight = new THREE.DirectionalLight( 0xDDDDDD );
 			this.spotLight.position.set( 1, 2, 3 );
 			this.spotLight.target = this.scene;
 			// this.spotLight.castShadow = true;
