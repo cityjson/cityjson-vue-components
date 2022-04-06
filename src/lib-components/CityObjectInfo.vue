@@ -278,8 +278,6 @@ export default {
 
 					const surfaceIdx = geometry.semantics.values[ this.boundaryId ];
 
-					console.log( surfaceIdx );
-
 					if ( surfaceIdx != undefined ) {
 
 						return geometry.semantics.surfaces[ surfaceIdx ];
