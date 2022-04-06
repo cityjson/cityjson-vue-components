@@ -102,6 +102,31 @@
           </table>
           <hr>
         </div>
+        <div v-if="parent.attributes">
+          <p class="h5">
+            Parent attributes
+          </p>
+          <table
+            class="table table-striped table-borderless overflow-auto"
+          >
+            <tbody>
+              <tr
+                v-for="(value, key) in parent.attributes"
+                :key="key"
+              >
+                <th
+                  scope="row"
+                  class="py-1"
+                >
+                  <small class="font-weight-bold">{{ key }}</small>
+                </th>
+                <td class="py-1">
+                  <small>{{ value }}</small>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <div v-if="Object.keys(surface).length > 0">
           <p class="h5">
             Active surface
@@ -194,6 +219,10 @@ export default {
 			type: Boolean,
 			default: false,
 		},
+		showParentAttributes: {
+			type: Boolean,
+			default: true
+		}
 	},
 	data() {
 
@@ -206,7 +235,9 @@ export default {
 	computed: {
 		attributesCount: function () {
 
-			return this.cityobjectAttributesCount + Object.keys( this.surface ).length;
+			const parentAttributes = this.parent.attributes ? Object.keys( this.parent.attributes ).length : 0;
+
+			return this.cityobjectAttributesCount + Object.keys( this.surface ).length + parentAttributes;
 
 		},
 		cityobjectAttributesCount: function () {
@@ -224,6 +255,21 @@ export default {
 
 			return ( "attributes" in this.cityobject && this.attributesCount > 0 )
 				     || Object.keys( this.surface ).length > 0;
+
+		},
+		parent: function () {
+
+			if ( this.showParentAttributes ) {
+
+				if ( this.cityobject.parents ) {
+
+					return this.getObject( this.cityobject.parents[ 0 ] );
+
+				}
+
+			}
+
+			return {};
 
 		},
 		surface: function () {
