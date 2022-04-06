@@ -418,9 +418,7 @@ export default {
 
 				for ( let i = 0; i < results.length; i ++ ) {
 
-					const { face, object } = results[ i ];
-
-					const lodIdx = object.geometry.getAttribute( "lodid" ).getX( face.a );
+					const lodIdx = results[ i ].object.resolveIntersectionInfo( results[ i ], this.citymodel ).lodIndex;
 
 					if ( lodIdx == this.activeLod ) {
 
@@ -455,19 +453,13 @@ export default {
 
 			}
 
-			const { face, object } = this.getActiveIntersection( intersects );
+			const intersection = this.getActiveIntersection( intersects );
 
-			const objIds = object.geometry.getAttribute( 'objectid' );
+			if ( intersection.object.isCityObject ) {
 
-			if ( objIds ) {
+				const info = intersection.object.resolveIntersectionInfo( intersection, this.citymodel );
 
-				const idx = objIds.getX( face.a );
-
-				const geomId = object.geometry.getAttribute( 'geometryid' ).getX( face.a );
-				const boundId = object.geometry.getAttribute( 'boundaryid' ).getX( face.a );
-
-				const objectId = Object.keys( this.citymodel.CityObjects )[ idx ];
-				this.$emit( 'object_clicked', [ objectId, geomId, boundId ] );
+				this.$emit( 'object_clicked', [ info.objectId, info.geometryIndex, info.boundaryIndex ] );
 
 			}
 
