@@ -8,7 +8,7 @@
 <script>
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { CityJSONLoader, CityJSONWorkerParser } from 'cityjson-threejs-loader';
+import { AttributeEvaluator, CityJSONLoader, CityJSONWorkerParser } from 'cityjson-threejs-loader';
 import { sRGBEncoding } from 'three';
 
 export default {
@@ -103,6 +103,18 @@ export default {
 		cameraSpotlight: {
 			type: Boolean,
 			default: true
+		},
+		conditionalFormatting: {
+			type: Boolean,
+			default: false
+		},
+		conditionalAttribute: {
+			type: String,
+			default: null
+		},
+		attributeColors: {
+			type: Object,
+			default: () => {}
 		}
 	},
 	data() {
@@ -228,6 +240,52 @@ export default {
 
 			this.updateScene();
 
+		},
+		conditionalFormatting: function ( value ) {
+
+			if ( this.conditionalAttribute == '' || this.conditionalAttribute === null ) {
+
+				return;
+
+			}
+
+			this.scene.traverse( c => {
+
+				if ( c.isCityObject ) {
+
+					c.material.conditionalFormatting = value;
+
+				}
+
+			} );
+
+			this.updateScene();
+
+		},
+		conditionalAttribute: function ( value ) {
+
+			this.updateConditionalInfo();
+
+			this.updateScene();
+
+		},
+		attributeColors: {
+			handler: function () {
+
+				this.scene.traverse( c => {
+
+					if ( c.isCityObject ) {
+
+						c.material.attributeColors = this.attributeColors;
+
+					}
+
+				} );
+
+				this.updateScene();
+
+			},
+			deep: true
 		}
 	},
 	beforeCreate() {
@@ -384,6 +442,29 @@ export default {
 				}
 
 			} );
+
+		},
+		updateConditionalInfo() {
+
+			if ( this.conditionalAttribute ) {
+
+				const evaluator = new AttributeEvaluator( this.citymodel, this.conditionalAttribute );
+				const colors = evaluator.createColors();
+
+				this.$emit( 'attributeColorsChanged', colors );
+
+				this.scene.traverse( c => {
+
+					if ( c.isCityObject ) {
+
+						c.addAttributeByProperty( evaluator );
+						c.material.attributeColors = colors;
+
+					}
+
+				} );
+
+			}
 
 		},
 		pointerDown( e ) {
