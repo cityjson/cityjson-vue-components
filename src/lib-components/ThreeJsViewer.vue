@@ -594,6 +594,16 @@ export default {
 			} );
 			this.controls.target.set( 0, 0, 0 );
 
+			const scope = this;
+			window.addEventListener( 'resize', _ => {
+
+				scope.camera.aspect = viewer.clientWidth / viewer.clientHeight;
+				scope.camera.updateProjectionMatrix();
+
+				scope.renderer.setSize( viewer.clientWidth, viewer.clientHeight );
+
+			}, false );
+
 		},
 		clearScene() {
 
