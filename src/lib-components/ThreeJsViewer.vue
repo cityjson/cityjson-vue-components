@@ -603,6 +603,8 @@ export default {
 
 				scope.renderer.setSize( viewer.clientWidth, viewer.clientHeight );
 
+				scope.updateScene();
+
 			}, false );
 
 		},
