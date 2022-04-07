@@ -14,7 +14,7 @@
           <i
             class="fas text-dark text-decoration-none"
             :class="[ isOpen ? 'fa-chevron-down' : 'fa-chevron-right' ]"
-          />
+          ></i>
         </a>
       </div>
       <div class="object-icon d-flex justify-content-center">
@@ -22,7 +22,7 @@
           id="objicon"
           href="#"
           :title="item.type"
-        ><i :class="iconType" /></a>
+        ><i :class="iconType"></i></a>
       </div>
       <a
         href="#"
@@ -33,7 +33,7 @@
         v-for="(geom, i) in item.geometry"
         :key="i"
         :geometry="geom"
-      />
+      ></geometry-badge>
     </div>
     <ul
       v-show="isOpen"
@@ -49,14 +49,14 @@
         :cityobject_id="child_id"
         :selected_objid="selected_objid"
         @object_clicked="$emit('object_clicked', $event)"
-      />
+      ></CityObjectsTreeItem>
     </ul>
   </li>
 </template>
 
 <script>
 import _ from 'lodash';
-import { getIconStyle } from '../helpers/icons'
+import { getIconStyle } from '../helpers/icons';
 
 import GeometryBadge from './common/GeometryBadge.vue';
 

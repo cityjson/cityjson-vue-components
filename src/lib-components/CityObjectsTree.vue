@@ -9,7 +9,7 @@
       :cityobject_id="coid"
       :selected_objid="selected_objid"
       @object_clicked="$emit('object_clicked', $event)"
-    />
+    ></CityObjectsTreeItem>
   </ul>
 </template>
 
