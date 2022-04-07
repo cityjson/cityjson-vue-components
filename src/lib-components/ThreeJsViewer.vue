@@ -556,7 +556,8 @@ export default {
 			this.camera.up.set( 0, 0, 1 );
 
 			this.renderer = new THREE.WebGLRenderer( {
-				antialias: true
+				antialias: window.devicePixelRatio > 1 ? false : true,
+				powerPreference: "high-performance"
 			} );
 			this.renderer.outputEncoding = sRGBEncoding;
 			viewer.appendChild( this.renderer.domElement );
