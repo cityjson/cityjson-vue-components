@@ -115,6 +115,10 @@ export default {
 		attributeColors: {
 			type: Object,
 			default: () => {}
+		},
+		activeMaterialTheme: {
+			type: String,
+			default: "undefined"
 		}
 	},
 	data() {
@@ -269,6 +273,21 @@ export default {
 			this.updateScene();
 
 		},
+		activeMaterialTheme: function ( theme ) {
+
+			this.scene.traverse( c => {
+
+				if ( c.supportsMaterials ) {
+
+					c.material.materialTheme = theme;
+
+				}
+
+			} );
+
+			this.updateScene();
+
+		},
 		attributeColors: {
 			handler: function () {
 
@@ -341,6 +360,7 @@ export default {
 				this.parser.onComplete = () => {
 
 					scope.$emit( 'rendering', false );
+					scope.$emit( 'loadCompleted' );
 
 				};
 
