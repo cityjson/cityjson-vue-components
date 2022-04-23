@@ -8,7 +8,7 @@
 <script>
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { AttributeEvaluator, CityJSONLoader, CityJSONWorkerParser } from 'cityjson-threejs-loader';
+import { AttributeEvaluator, CityJSONLoader, CityJSONWorkerParser, TextureManager } from 'cityjson-threejs-loader';
 import { sRGBEncoding } from 'three';
 
 export default {
@@ -119,7 +119,15 @@ export default {
 		activeMaterialTheme: {
 			type: String,
 			default: "undefined"
-		}
+		},
+		textureManager: {
+			type: TextureManager,
+			default: undefined
+		},
+		activeTextureTheme: {
+			type: String,
+			default: "undefined"
+		},
 	},
 	data() {
 
@@ -280,6 +288,23 @@ export default {
 				if ( c.supportsMaterials ) {
 
 					c.material.materialTheme = theme;
+
+				}
+
+			} );
+
+			this.updateScene();
+
+		},
+		activeTextureTheme: function ( theme ) {
+
+			const scope = this;
+
+			this.scene.traverse( c => {
+
+				if ( c.supportsMaterials ) {
+
+					c.setTextureTheme( theme, scope.textureManager );
 
 				}
 
