@@ -32,7 +32,7 @@
     "jquery": "^3.6.0",
     "lodash": "^4.17.15",
     "popper.js": "^1.16.1",
-    "three": "^0.127.0"
+    "three": "^0.139.2"
   },
   "devDependencies": {
     "@vue/component-compiler-utils": "^3.2.0",

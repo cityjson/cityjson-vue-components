@@ -2071,10 +2071,10 @@ cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
 
 "cityjson-threejs-loader@git+https://github.com/cityjson/cityjson-threejs-loader.git#develop":
   version "0.2.0"
-  resolved "git+https://github.com/cityjson/cityjson-threejs-loader.git#9433dce6db65eff9aa32ff4c82d803f9c957e921"
+  resolved "git+https://github.com/cityjson/cityjson-threejs-loader.git#957063e5adea1428fabf60bda4d053fa0b56b393"
   dependencies:
     earcut "^2.2.2"
-    three "^0.127.0"
+    three "^0.139.2"
 
 cjs-module-lexer@^0.6.0:
   version "0.6.0"
@@ -7131,10 +7131,10 @@ text-table@^0.2.0:
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
 
-three@^0.127.0:
-  version "0.127.0"
-  resolved "https://registry.yarnpkg.com/three/-/three-0.127.0.tgz#c463f4d41b2c735dcf8e9e51a388815e80cd3791"
-  integrity sha512-wtgrn+mhYUbobxT7QN3GPdu3SRpSBQvwY6uOzLChWS7QE//f7paDU/+wlzbg+ngeIvBBqjBHSRuywTh8A99Jng==
+three@^0.139.2:
+  version "0.139.2"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.139.2.tgz#b110799a15736df673b9293e31653a4ac73648dd"
+  integrity sha512-gV7q7QY8rogu7HLFZR9cWnOQAUedUhu2WXAnpr2kdXZP9YDKsG/0ychwQvWkZN5PlNw9mv5MoCTin6zNTXoONg==
 
 throat@^5.0.0:
   version "5.0.0"
