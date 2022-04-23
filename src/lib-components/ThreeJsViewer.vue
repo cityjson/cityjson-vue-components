@@ -452,17 +452,27 @@ export default {
 
 			this.scene.traverse( c => {
 
-				if ( c.material && c.material.isCityObjectsMaterial ) {
+				if ( c.material ) {
 
-					c.material.selectSurface = this.highlightSelectedSurface;
+					const mats = Array.isArray( c.material ) ? c.material : [ c.material ];
 
-					c.material.highlightedObject = {
+					for ( const mat of mats ) {
 
-						objectIndex: idx,
-						geometryIndex: this.selectedGeomIdx,
-						boundaryIndex: this.selectedBoundaryIdx
+						if ( mat.isCityObjectsMaterial ) {
 
-					};
+							mat.selectSurface = this.highlightSelectedSurface;
+
+							mat.highlightedObject = {
+
+								objectIndex: idx,
+								geometryIndex: this.selectedGeomIdx,
+								boundaryIndex: this.selectedBoundaryIdx
+
+							};
+
+						}
+
+					}
 
 				}
 
@@ -608,8 +618,8 @@ export default {
 			viewer.appendChild( this.renderer.domElement );
 			this.renderer.setSize( viewer.clientWidth, viewer.clientHeight );
 			this.renderer.setClearColor( this.backgroundColor );
-			this.renderer.shadowMap.enabled = true;
-			this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+			// this.renderer.shadowMap.enabled = true;
+			// this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 			let self = this;
 
